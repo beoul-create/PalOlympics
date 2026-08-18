@@ -1,4 +1,9 @@
 {
   "version": "1.0.0",
-  "download_url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/refs/heads/main/PalOlympics.zip"
+  "files": [
+    {
+      "path": "YourModName.pak",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/main/YourModName.pak"
+    }
+  ]
 }
