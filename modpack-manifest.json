@@ -6,24 +6,160 @@
       "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/dwmapi.dll"
     },
     {
-      "path": "UE4SS.dll",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/UE4SS.dll"
+      "path": "ue4ss/LICENSE",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/LICENSE"
     },
     {
-      "path": "UE4SS-settings.ini",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/UE4SS-settings.ini"
+      "path": "ue4ss/MemberVariableLayout.ini",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/MemberVariableLayout.ini"
     },
     {
-      "path": "MemberVariableLayout.ini",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/MemberVariableLayout.ini"
+      "path": "ue4ss/Mods/BPML_GenericFunctions/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/BPML_GenericFunctions/Scripts/main.lua"
     },
     {
-      "path": "mods.json",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/mods.json"
+      "path": "ue4ss/Mods/BPModLoaderMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/BPModLoaderMod/Scripts/main.lua"
     },
     {
-      "path": "mods.txt",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/mods.txt"
+      "path": "ue4ss/Mods/BPModLoaderMod/load_order.txt",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/BPModLoaderMod/load_order.txt"
+    },
+    {
+      "path": "ue4ss/Mods/CheatManagerEnablerMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/CheatManagerEnablerMod/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/ConsoleCommandsMod/Scripts/dump_object.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/ConsoleCommandsMod/Scripts/dump_object.lua"
+    },
+    {
+      "path": "ue4ss/Mods/ConsoleCommandsMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/ConsoleCommandsMod/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/ConsoleCommandsMod/Scripts/set.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/ConsoleCommandsMod/Scripts/set.lua"
+    },
+    {
+      "path": "ue4ss/Mods/ConsoleCommandsMod/Scripts/summon_unloaded_assets.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/ConsoleCommandsMod/Scripts/summon_unloaded_assets.lua"
+    },
+    {
+      "path": "ue4ss/Mods/ConsoleEnablerMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/ConsoleEnablerMod/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/Keybinds/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/Keybinds/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/LineTraceMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/LineTraceMod/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/dlls/main.dll",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/dlls/main.dll"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/enabled.txt",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/enabled.txt"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE-FoP/metadata.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE-FoP/metadata.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE-FoP/raw/APSE_FoP.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE-FoP/raw/APSE_FoP.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/blueprints/Silvegis.jsonc",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/blueprints/Silvegis.jsonc"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/items/APSE_items.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/items/APSE_items.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/metadata.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/metadata.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/pals/itemdrops.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/pals/itemdrops.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/raw/APSE.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/raw/APSE.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/spawns/Silvegis_spawn.jsonc",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/spawns/Silvegis_spawn.jsonc"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/translations/en/APSE_Translation.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/translations/en/APSE_Translation.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/APSE/translations/global/APSE_Translation.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/APSE/translations/global/APSE_Translation.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/PalworldTuner/metadata.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/PalworldTuner/metadata.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/10_enemy_pals.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/10_enemy_pals.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/20_enemy_humans.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/20_enemy_humans.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/50_stack_sizes.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalSchema/mods/PalworldTuner/raw/50_stack_sizes.json"
+    },
+    {
+      "path": "ue4ss/Mods/PalworldTuner/Scripts/config.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalworldTuner/Scripts/config.lua"
+    },
+    {
+      "path": "ue4ss/Mods/PalworldTuner/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalworldTuner/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/PalworldTuner/enabled.txt",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalworldTuner/enabled.txt"
+    },
+    {
+      "path": "ue4ss/Mods/PalworldTuner/my_settings.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/PalworldTuner/my_settings.json"
+    },
+    {
+      "path": "ue4ss/Mods/SplitScreenMod/Scripts/main.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/SplitScreenMod/Scripts/main.lua"
+    },
+    {
+      "path": "ue4ss/Mods/mods.json",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/mods.json"
+    },
+    {
+      "path": "ue4ss/Mods/mods.txt",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/mods.txt"
+    },
+    {
+      "path": "ue4ss/Mods/shared/README.txt",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/shared/README.txt"
+    },
+    {
+      "path": "ue4ss/Mods/shared/UEHelpers/UEHelpers.lua",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/Mods/shared/UEHelpers/UEHelpers.lua"
+    },
+    {
+      "path": "ue4ss/UE4SS-settings.ini",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/UE4SS-settings.ini"
     },
     {
       "path": "ue4ss/UE4SS.dll",
