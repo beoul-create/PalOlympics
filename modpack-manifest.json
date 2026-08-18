@@ -2,8 +2,12 @@
   "version": "1.0.0",
   "files": [
     {
-      "path": "YourModName.pak",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/main/YourModName.pak"
+      "path": "dwmapi.dll",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/dwmapi.dll"
+    },
+    {
+      "path": "ue4ss/UE4SS.dll",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/UE4SS.dll"
     }
   ]
 }
