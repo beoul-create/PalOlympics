@@ -18,16 +18,16 @@
       "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/MemberVariableLayout.ini"
     },
     {
-      "path": "LICENSE",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/LICENSE"
-    },
-    {
       "path": "mods.json",
       "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/mods.json"
     },
     {
       "path": "mods.txt",
       "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/mods.txt"
+    },
+    {
+      "path": "ue4ss/UE4SS.dll",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/a5a01a490c74258512f4d0f6a732d969be9b5987/mods/PalOlympics/ue4ss/UE4SS.dll"
     }
   ]
 }
