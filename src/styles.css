@@ -1,0 +1,393 @@
+:root { color: #241b19; background: #151b1d; font-family: Georgia, "Times New Roman", serif; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; --paper: #e8d9b8; --brown: #3b2523; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; overflow: auto; user-select: none; -webkit-user-select: none; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 1; }
+.config-panel input[type="text"] { user-select: text; -webkit-user-select: text; }
+.launcher-shell { display: grid; min-height: 100vh; place-items: center; padding: 3vw; background: #172023 url("assets/launcher-bg.png") center / cover no-repeat fixed; }
+.launcher-artboard { position: relative; width: min(100%, calc((100vh - 6vw) * 1.875), 1440px); aspect-ratio: 1440 / 768; overflow: hidden; isolation: isolate; }
+.cloud-track { position: absolute; z-index: 0; inset: 0 auto 0 0; display: flex; width: 200%; height: 100%; animation: cloud-roll 42s linear infinite; will-change: transform; }
+.launcher-background { flex: 0 0 50%; width: 50%; height: 100%; object-fit: cover; object-position: center; }
+.brand-lockup, .game-actions, .modpack-label, .config-panel { z-index: 1; }
+.cloud-overlay { position: absolute; z-index: 0; left: 0; width: 220%; pointer-events: none; background-repeat: repeat-x; background-size: 50% 100%; filter: blur(12px); mix-blend-mode: screen; opacity: .58; will-change: transform; }
+.cloud-overlay-high { top: 8%; height: 27%; background-image: radial-gradient(ellipse at 12% 58%, rgba(255, 255, 255, .7) 0 11%, transparent 30%), radial-gradient(ellipse at 34% 42%, rgba(255, 255, 255, .56) 0 14%, transparent 34%), radial-gradient(ellipse at 58% 64%, rgba(244, 252, 255, .62) 0 12%, transparent 31%), radial-gradient(ellipse at 83% 45%, rgba(255, 255, 255, .52) 0 15%, transparent 34%); animation: overlay-cloud-roll 30s linear infinite; }
+.cloud-overlay-low { top: 49%; height: 34%; opacity: .44; background-image: radial-gradient(ellipse at 8% 55%, rgba(220, 244, 255, .72) 0 15%, transparent 36%), radial-gradient(ellipse at 29% 38%, rgba(255, 255, 255, .55) 0 12%, transparent 32%), radial-gradient(ellipse at 57% 59%, rgba(226, 247, 255, .66) 0 16%, transparent 37%), radial-gradient(ellipse at 87% 42%, rgba(255, 255, 255, .52) 0 13%, transparent 33%); animation: overlay-cloud-roll-slow 52s linear infinite; }
+.brand-lockup { position: absolute; top: 1%; left: 35.4%; width: 29.2%; text-align: center; color: #f1d5a1; text-shadow: 0 2px 2px #23191b; }
+.brand-title { color: #f6ebd1; font: 700 clamp(18px, 3vw, 43px) Georgia, serif; letter-spacing: .04em; }
+.launcher-title { margin-top: 2px; font: italic clamp(21px, 3.1vw, 45px) Georgia, serif; }
+.version { font: 11px "Trebuchet MS", sans-serif; letter-spacing: .08em; }
+.game-actions { position: absolute; inset: 0; text-align: center; }
+.ornate-button, .download-button { border: 0; border-radius: 4px; color: transparent; background: transparent; box-shadow: none; font-size: 0; line-height: 0; text-indent: -9999px; }
+.detect-button { position: absolute; top: 23.1%; left: 39.1%; width: 19.5%; min-height: 7.1%; }
+.ornate-button:hover:not(:disabled), .download-button:hover:not(:disabled) { background: rgba(255, 224, 157, .12); box-shadow: inset 0 0 0 2px rgba(255, 224, 157, .3); }
+.ornate-button:focus-visible, .download-button:focus-visible { outline: 2px solid #f6d28d; outline-offset: 3px; }
+.path-display { position: absolute; top: 30.1%; left: 38.7%; width: 21%; min-height: 18px; margin: 8px auto 0; overflow: hidden; color: #f1d6ab; font: 10px "Courier New", monospace; text-overflow: ellipsis; white-space: nowrap; }
+.download-button { position: absolute; top: 67.6%; left: 34.6%; width: 27.7%; min-height: 6.8%; padding: 12px; }
+.status-display { position: absolute; top: 75%; left: 34.6%; width: 27.7%; min-height: 20px; margin: 7px auto; color: #f0d4a2; font: 10px "Courier New", monospace; }
+.modpack-label { position: absolute; top: 39.5%; left: 40.5%; width: 17%; color: #1f1015; font: italic clamp(18px, 2.5vw, 37px) Georgia, serif; line-height: 1.05; text-align: center; transform: rotate(-4deg); }
+.config-panel { position: absolute; top: 10.8%; right: 15.2%; width: 22.3%; height: 76.4%; padding: 2.5% 2% 1%; color: var(--brown); font-size: clamp(9px, 1.05vw, 16px); line-height: 1.15; }
+.config-panel h1 { margin: 0 0 5%; font: italic clamp(16px, 1.8vw, 27px) Georgia, serif; text-align: center; }
+.config-group { margin-bottom: 4%; }
+.config-group h2 { margin: 0; font: italic 700 clamp(11px, 1.25vw, 18px) Georgia, serif; }
+.config-group label, .group-subtitle { display: block; font-style: italic; }
+.config-panel input[type="text"] { width: 86%; height: 25px; margin: 3px 0 7px; padding: 2px 6px; border: 1px solid #765b47; border-radius: 4px; color: var(--brown); background: rgba(255, 245, 222, .55); font: 12px "Trebuchet MS", sans-serif; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 7px; margin: 5px 0; }
+.setting-row label { flex: 1; }
+.toggle-input { position: relative; width: 36px; height: 19px; margin: 0; appearance: none; border: 1px solid #765b47; border-radius: 15px; background: #736b68; }
+.toggle-input::after { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #eee3d2; content: ""; transition: transform .2s; }
+.toggle-input:checked { background: #65a9bd; }
+.toggle-input:checked::after { transform: translateX(17px); }
+.audio-group { margin-top: 7%; }
+.volume-row { display: flex; align-items: center; gap: 7px; margin: 7px 0 11px; }
+.volume-row input { flex: 1; min-width: 0; accent-color: #673c46; }
+.volume-row output { min-width: 29px; }
+.connections-group { margin-top: 7%; }
+.group-subtitle { margin: 0 0 5px; }
+.connection-row { display: flex; gap: 4px; }
+.connection-button { flex: 1; min-width: 0; padding: 5px 4px; overflow: hidden; border: 1px solid #543340; border-radius: 4px; color: #f4e2c1; background: #4e2939; font: 10px "Trebuchet MS", sans-serif; text-overflow: ellipsis; white-space: nowrap; }
+.connection-button span { margin-left: 4px; }
+.refresh-button { width: 28px; border: 1px solid #765b47; color: var(--brown); background: transparent; }
+.connection-status { margin: 3px 0 8px; font-size: .9em; }
+@media (max-width: 800px) {
+  .launcher-shell { padding: 0; align-items: start; background-attachment: scroll; }
+  .launcher-artboard { width: 100%; min-height: 100vh; aspect-ratio: auto; background: rgba(19, 23, 23, .5); }
+  .brand-lockup { top: 3vh; left: 8%; width: 84%; }
+  .game-actions { top: 0; left: 0; width: 100%; }
+  .detect-button { top: 18vh; left: 8%; width: 84%; min-height: 43px; }
+  .path-display { top: calc(18vh + 51px); left: 8%; width: 84%; }
+  .download-button { top: 43vh; left: 8%; width: 84%; min-height: 43px; }
+  .status-display { top: calc(43vh + 51px); left: 8%; width: 84%; }
+  .modpack-label { display: none; }
+  .config-panel { position: absolute; top: 56vh; right: 8%; width: 84%; height: auto; padding: 24px 20px; border: 1px solid rgba(232, 217, 184, .55); border-radius: 5px; background: rgba(232, 217, 184, .94); }
+}
+
+/* Sky background theme: the replacement image has no built-in UI artwork. */
+:root { color: #eff8ff; background: #94c5e4; --brown: #eaf5fc; }
+body { background: #94c5e4; }
+.launcher-shell { position: relative; min-height: 100vh; padding: 0; background: #94c5e4; }
+.launcher-artboard { width: 100%; min-height: 100vh; aspect-ratio: auto; overflow: hidden; }
+.cloud-track { position: fixed; width: 200vw; height: 100vh; }
+.launcher-artboard::after { position: fixed; z-index: 0; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(12, 43, 72, .32), transparent 45%, rgba(20, 56, 86, .2)), linear-gradient(0deg, rgba(16, 51, 79, .18), transparent 42%); content: ""; }
+.brand-lockup { top: 8vh; left: 8vw; width: auto; text-align: left; color: #fff; text-shadow: 0 3px 14px rgba(10, 46, 77, .5); }
+.brand-title { color: #fff; font: 700 clamp(24px, 4vw, 58px) "Trebuchet MS", sans-serif; letter-spacing: .16em; }
+.launcher-title { margin-top: 6px; color: #dff3ff; font: italic clamp(24px, 3.6vw, 52px) Georgia, serif; }
+.version { margin-top: 10px; color: #eaf8ff; font: 11px "Trebuchet MS", sans-serif; letter-spacing: .18em; }
+.game-actions { top: 31vh; left: 8vw; width: min(410px, 35vw); padding: 24px; border: 1px solid rgba(255, 255, 255, .52); border-radius: 18px; background: rgba(11, 45, 74, .54); box-shadow: 0 18px 50px rgba(18, 66, 100, .22), inset 0 1px rgba(255, 255, 255, .25); backdrop-filter: blur(12px); }
+.ornate-button, .download-button { position: static; display: block; width: 100%; min-height: 48px; padding: 12px 18px; border: 1px solid rgba(255, 255, 255, .58); border-radius: 9px; color: #143c5a; background: linear-gradient(135deg, #fff, #cdeeff); box-shadow: 0 7px 18px rgba(9, 44, 72, .23); font: 700 12px "Trebuchet MS", sans-serif; letter-spacing: .12em; line-height: 1.2; text-indent: 0; text-transform: uppercase; }
+.ornate-button:hover:not(:disabled), .download-button:hover:not(:disabled) { color: #082a44; background: #fff; box-shadow: 0 9px 24px rgba(9, 44, 72, .34); filter: none; }
+.detect-button { min-height: 48px; }
+.path-display { position: static; width: 100%; min-height: 18px; margin: 10px 0 20px; color: #17425f; font: 600 12px/1.4 "Trebuchet MS", sans-serif; text-align: left; word-break: break-all; }
+.download-button { color: #fff; background: linear-gradient(135deg, #157fb3, #07537f); }
+.download-button:hover:not(:disabled) { color: #fff; background: linear-gradient(135deg, #2199cb, #08638f); }
+.game-status { position: static; width: 100%; margin: 12px 0 0; color: #071b2b; font: 700 12px "Trebuchet MS", sans-serif; letter-spacing: .02em; text-align: left; }
+.game-status[data-running="true"] { color: #08733d; }
+.status-display { position: static; width: 100%; min-height: 20px; margin: 6px 0 0; color: #0b557a; font: 600 12px/1.4 "Trebuchet MS", sans-serif; text-align: left; word-break: break-all; }
+.modpack-label {
+  position: absolute;
+  top: 53vh;
+  left: calc(8vw + min(410px, 35vw));
+  right: calc(8vw + min(340px, 27vw));
+  width: auto;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #071b2b;
+  font: italic 800 clamp(28px, 3.8vw, 56px)/1.02 "Trebuchet MS", Georgia, serif;
+  letter-spacing: .02em;
+  text-align: center;
+  text-shadow: 0 4px 20px rgba(255, 255, 255, .9), 0 2px 6px rgba(255, 255, 255, .95);
+  transform: translateY(-50%) rotate(-3deg);
+  pointer-events: none;
+  user-select: none;
+}
+.config-panel { top: 8vh; right: 8vw; width: min(380px, 30vw); height: auto; min-height: 560px; max-height: 84vh; overflow-y: auto; padding: 24px 22px; border: 1px solid rgba(255, 255, 255, .8); border-radius: 18px; color: #071b2b; background: rgba(239, 250, 255, .74); box-shadow: 0 18px 50px rgba(29, 83, 116, .2), inset 0 1px rgba(255, 255, 255, .9); backdrop-filter: blur(12px); font-size: 13px; line-height: 1.3; }
+.settings-tabs { display: flex; gap: 4px; margin-bottom: 18px; padding: 3px; border-radius: 9px; background: rgba(7, 27, 43, .08); border: 1px solid rgba(7, 27, 43, .1); }
+.tab-btn { flex: 1; padding: 7px 4px; border: 0; border-radius: 7px; color: #0b3d60; background: transparent; font: 600 11px "Trebuchet MS", sans-serif; letter-spacing: .04em; cursor: pointer; transition: all .15s ease; }
+.tab-btn:hover { color: #071b2b; background: rgba(7, 27, 43, .06); }
+.tab-btn.active { color: #071b2b; background: #ffffff; box-shadow: 0 2px 6px rgba(7, 27, 43, .15); font-weight: 800; }
+.tab-panel { display: none; animation: fadeIn .2s ease; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.config-group { margin-bottom: 20px; }
+.config-group h2 { margin: 0 0 8px; color: #0b557a; font: 800 12px "Trebuchet MS", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.config-group label, .group-subtitle { color: #071b2b; font: 600 12px "Trebuchet MS", sans-serif; font-style: normal; }
+.config-panel input[type="text"] { width: 100%; height: 34px; margin: 7px 0 12px; padding: 5px 9px; border: 1px solid rgba(7, 27, 43, .22); border-radius: 7px; outline: none; color: #071b2b; background: rgba(255, 255, 255, .95); font: 600 12px "Courier New", monospace; }
+.config-panel input[type="text"]:focus { border-color: #0b557a; box-shadow: 0 0 0 3px rgba(11, 85, 122, .2); }
+.setting-hint { margin: -6px 0 12px; font-size: 11px; color: #17425f; font-weight: 500; line-height: 1.35; }
+.badge-chip { display: inline-block; margin-left: 6px; padding: 1px 6px; font: 800 9px "Trebuchet MS", sans-serif; text-transform: uppercase; border-radius: 4px; background: #0b557a; color: #ffffff; vertical-align: middle; }
+.preset-chips-label { margin: 4px 0 6px; font: 700 11px "Trebuchet MS", sans-serif; color: #0b557a; }
+.preset-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.preset-chip { padding: 4px 8px; border: 1px solid rgba(7, 27, 43, .22); border-radius: 6px; color: #071b2b; background: rgba(255, 255, 255, .9); font: 600 11px "Courier New", monospace; cursor: pointer; transition: all .15s ease; }
+.preset-chip:hover { color: #071b2b; background: #d8f0ff; border-color: #0b557a; }
+.preset-chip.active { background: #0b557a; color: #ffffff; font-weight: 700; border-color: #0b557a; }
+.action-button { width: 100%; min-height: 38px; margin: 6px 0 10px; padding: 8px 12px; border: 1px solid rgba(7, 27, 43, .2); border-radius: 8px; color: #ffffff; background: linear-gradient(135deg, #106f9d, #074a73); font: 700 11px "Trebuchet MS", sans-serif; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; transition: all .15s ease; box-shadow: 0 2px 8px rgba(7, 27, 43, .15); }
+.action-button:hover:not(:disabled) { background: linear-gradient(135deg, #1688bf, #0b5a8c); box-shadow: 0 4px 14px rgba(7, 27, 43, .25); }
+.action-button.secondary { background: #ffffff; border-color: rgba(7, 27, 43, .25); color: #071b2b; font-weight: 700; }
+.action-button.secondary:hover:not(:disabled) { background: #eaf6fc; border-color: #0b557a; color: #071b2b; }
+.action-btn-row { display: flex; gap: 8px; }
+.action-btn-row .action-button { flex: 1; }
+.status-chip { min-height: 18px; margin: 4px 0 10px; font: 600 11px "Courier New", monospace; color: #071b2b; word-break: break-all; }
+.status-chip[data-state="success"] { color: #08733d; font-weight: 700; }
+.status-chip[data-state="error"] { color: #a52828; font-weight: 700; }
+.status-chip[data-state="pending"] { color: #0b557a; font-style: italic; }
+.setting-row { margin: 11px 0; }
+.toggle-input { flex: 0 0 38px; width: 38px; height: 21px; border-color: rgba(7, 27, 43, .38); background: rgba(7, 27, 43, .18); }
+.toggle-input::after { width: 15px; height: 15px; background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, .2); }
+.toggle-input:checked { background: #0b557a; }
+.toggle-input:checked::after { transform: translateX(17px); }
+.audio-group, .connections-group { margin-top: 0; }
+.volume-row { margin: 10px 0 15px; color: #071b2b; font-weight: 600; }
+.volume-row input { accent-color: #0b557a; }
+.volume-row output { color: #071b2b; font: 700 12px "Trebuchet MS", sans-serif; }
+.connection-row { gap: 7px; }
+.connection-button { padding: 9px 8px; border: 1px solid rgba(7, 27, 43, .2); border-radius: 7px; color: #ffffff; background: linear-gradient(135deg, #126f9c, #094e77); font: 700 11px "Trebuchet MS", sans-serif; }
+.connection-button span { color: #dff4ff; font-weight: 500; }
+.connection-button:hover { background: linear-gradient(135deg, #1a83b6, #0c5c8c); }
+.refresh-button { width: 32px; border: 1px solid rgba(7, 27, 43, .25); border-radius: 7px; color: #071b2b; background: #ffffff; font-weight: 700; }
+.refresh-button:hover { background: #eaf6fc; border-color: #0b557a; }
+.connection-status { margin: 5px 0 12px; color: #153c55; font: 600 11px "Trebuchet MS", sans-serif; }
+#launcher-music { display: none; }
+.cloud-track { position: absolute; inset: 0 auto 0 0; width: 200%; height: 100%; animation: cloud-roll 24s linear infinite; animation-play-state: running; }
+@keyframes cloud-roll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes overlay-cloud-roll {
+  from { transform: translate3d(0, 0, 0) scale(1.03); }
+  to { transform: translate3d(-50%, 0, 0) scale(1.03); }
+}
+@keyframes overlay-cloud-roll-slow {
+  from { transform: translate3d(0, 0, 0) scale(1.06); }
+  to { transform: translate3d(-50%, 0, 0) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cloud-track, .cloud-overlay { animation: none; transform: none; }
+}
+@media (max-width: 900px) {
+  .brand-lockup { top: 5vh; left: 7vw; }
+  .game-actions { top: 24vh; left: 7vw; width: min(410px, 86vw); }
+  .config-panel { top: 24vh; right: 7vw; width: min(340px, 86vw); transform: translateY(360px); }
+  .modpack-label { display: none; }
+}
+@media (max-width: 620px) {
+  .brand-lockup { position: relative; top: auto; left: auto; width: auto; padding: 8vh 8vw 0; }
+  .game-actions { top: 24vh; left: 8vw; width: 84vw; }
+  .config-panel { top: 0; right: auto; left: 8vw; width: 84vw; margin-top: 68vh; transform: none; }
+}
+
+/* Dark type and light surfaces keep the controls readable over bright clouds. */
+:root { color: #071b2b; --brown: #071b2b; }
+.brand-lockup { color: #071b2b; text-shadow: 0 2px 10px rgba(255, 255, 255, .72); }
+.brand-title, .launcher-title { color: #071b2b; text-shadow: 0 2px 8px rgba(255, 255, 255, .72); }
+.version { color: #153c55; text-shadow: none; }
+.game-actions { border-color: rgba(255, 255, 255, .78); background: rgba(239, 250, 255, .7); box-shadow: 0 18px 50px rgba(29, 83, 116, .2), inset 0 1px rgba(255, 255, 255, .85); }
+.path-display { color: #17425f; font: 600 12px/1.4 "Trebuchet MS", sans-serif; text-shadow: none; }
+.status-display { color: #0b557a; font: 600 12px/1.4 "Trebuchet MS", sans-serif; text-shadow: none; }
+.game-status { color: #071b2b; font: 700 12px "Trebuchet MS", sans-serif; text-shadow: none; }
+.game-status[data-running="true"] { color: #08733d; }
+.modpack-label { color: #071b2b; text-shadow: 0 3px 16px rgba(255, 255, 255, .75); }
+.config-panel { color: #071b2b; border-color: rgba(255, 255, 255, .8); background: rgba(239, 250, 255, .74); box-shadow: 0 18px 50px rgba(29, 83, 116, .2), inset 0 1px rgba(255, 255, 255, .9); }
+.config-panel h1 { color: #071b2b; }
+.config-group h2 { color: #0b557a; }
+.config-group label, .group-subtitle { color: #071b2b; }
+.config-panel input[type="text"] { color: #071b2b; background: rgba(255, 255, 255, .92); }
+.toggle-input { border-color: rgba(7, 27, 43, .38); background: rgba(7, 27, 43, .18); }
+.volume-row, .volume-row output { color: #071b2b; }
+.connection-status { color: #153c55; }
+.connection-status[data-state="success"] { color: #08733d; }
+.connection-status[data-state="warning"] { color: #8a5a08; }
+.connection-status[data-state="error"] { color: #a52828; }
+.fps-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; font: 700 10px "Courier New", monospace; border-radius: 4px; background: #0b557a; color: #ffffff; letter-spacing: 0; vertical-align: middle; }
+.refresh-button { color: #071b2b; background: rgba(255, 255, 255, .55); }
+.launcher-artboard { isolation: isolate; }
+.window-bar { position: absolute; z-index: 4; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; height: 34px; padding-left: 14px; color: #071b2b; background: rgba(135, 201, 230, .48); border-bottom: 1px solid rgba(255, 255, 255, .35); backdrop-filter: blur(8px); cursor: grab; user-select: none; -webkit-user-select: none; }
+.window-bar:active { cursor: grabbing; }
+.window-bar-title { width: auto; height: 100%; padding: 0 12px; border: 0; color: #071b2b; background: transparent; cursor: grab; font: 600 11px "Trebuchet MS", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.window-bar-title:active { cursor: grabbing; }
+.window-controls { display: flex; height: 100%; cursor: default; }
+.window-control { width: 46px; height: 100%; padding: 0; border: 0; color: #071b2b; background: transparent; font: 20px/1 "Trebuchet MS", sans-serif; }
+.window-control:hover { background: rgba(255, 255, 255, .3); }
+.close-control:hover { color: #fff; background: #c94c56; }
+.cloud-track { z-index: 0; display: flex; width: 200%; height: 100%; will-change: transform; transform: translate3d(0, 0, 0); backface-visibility: hidden; }
+.cloud-track .launcher-background { flex: 0 0 50%; width: 50%; height: 100%; object-fit: cover; backface-visibility: hidden; }
+.cloud-track.js-cloud-motion { animation: none; }
+.cloud-track.js-cloud-motion ~ .cloud-overlay { animation: none; }
+.cloud-track.animations-disabled {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  animation: none !important;
+  transform: none !important;
+}
+.cloud-track.animations-disabled .launcher-background-canvas {
+  display: none !important;
+}
+.cloud-track.animations-disabled .launcher-background {
+  display: block !important;
+  flex: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  opacity: 1 !important;
+}
+.cloud-track.animations-disabled .launcher-background + .launcher-background {
+  display: none !important;
+}
+.cloud-track.animations-disabled ~ .cloud-overlay {
+  animation: none !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+.cloud-track.page-hidden, .cloud-track.page-hidden ~ .cloud-overlay { animation: none !important; }
+.launcher-artboard::after { z-index: 1; }
+.cloud-overlay { z-index: 2; will-change: transform; transform: translate3d(0, 0, 0); backface-visibility: hidden; }
+.brand-lockup, .game-actions, .modpack-label, .config-panel { z-index: 3; }
+.no-hw-accel .cloud-track,
+.no-hw-accel .cloud-overlay,
+.no-hw-accel .launcher-background {
+  will-change: auto !important;
+  transform: none;
+  backface-visibility: visible !important;
+}
+.launcher-background-video {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+.launcher-background-canvas {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.cloud-track.has-canvas-interpolation {
+  width: 100%;
+  animation: none !important;
+  transform: none !important;
+}
+.cloud-track.has-canvas-interpolation .launcher-background-canvas {
+  display: block;
+}
+.cloud-track.has-canvas-interpolation .launcher-background {
+  display: none;
+}
+
+/* Update Modal Dialog */
+.update-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.update-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 27, 43, .65);
+  backdrop-filter: blur(8px);
+}
+.update-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 90vw);
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 18px;
+  background: rgba(239, 250, 255, .95);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .9);
+  color: #071b2b;
+  animation: modalPop .2s ease-out;
+}
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.update-modal-header {
+  margin-bottom: 12px;
+}
+.update-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #08733d;
+  color: #fff;
+  font: 800 10px "Trebuchet MS", sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.update-modal-header h2 {
+  margin: 0;
+  color: #071b2b;
+  font: 800 18px "Trebuchet MS", sans-serif;
+}
+.update-version-text {
+  margin: 0 0 10px;
+  font: 600 13px "Trebuchet MS", sans-serif;
+  color: #0b557a;
+}
+.update-notes {
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: rgba(7, 27, 43, .06);
+  border: 1px solid rgba(7, 27, 43, .12);
+  color: #17425f;
+  font: 12px/1.4 "Trebuchet MS", sans-serif;
+  white-space: pre-wrap;
+}
+.update-progress-container {
+  margin: 12px 0;
+}
+.update-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(7, 27, 43, .15);
+  overflow: hidden;
+}
+.update-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #106f9d, #38bdf8);
+  border-radius: 4px;
+  transition: width .2s ease;
+  animation: pulseProgress 1.5s infinite ease-in-out;
+}
+@keyframes pulseProgress {
+  0% { opacity: .7; }
+  50% { opacity: 1; }
+  100% { opacity: .7; }
+}
+.update-progress-text {
+  margin: 6px 0 0;
+  font: 600 11px "Trebuchet MS", sans-serif;
+  color: #0b557a;
+}
+.update-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.update-modal-actions .action-button {
+  flex: 1;
+  margin: 0;
+}

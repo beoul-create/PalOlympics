@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PalOlympics Launcher</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <audio id="launcher-music" autoplay loop preload="auto" src="./assets/launcher-music.mp3"></audio>
+    <main class="launcher-shell">
+      <div class="launcher-artboard" aria-label="PalOlympics launcher">
+        <div class="cloud-track" aria-hidden="true">
+          <canvas id="background-canvas" class="launcher-background-canvas"></canvas>
+          <img class="launcher-background" src="./assets/launcher-bg.gif" alt="" />
+          <img class="launcher-background" src="./assets/launcher-bg.gif" alt="" />
+        </div>
+        <div class="cloud-overlay cloud-overlay-high" aria-hidden="true"></div>
+        <div class="cloud-overlay cloud-overlay-low" aria-hidden="true"></div>
+        <header id="window-bar" class="window-bar">
+          <button id="drag-window-btn" class="window-bar-title" type="button" aria-label="Drag PalOlympics Launcher window">PalOlympics Launcher</button>
+          <div class="window-controls">
+            <button id="minimize-btn" class="window-control" type="button" aria-label="Minimize launcher">−</button>
+            <button id="close-btn" class="window-control close-control" type="button" aria-label="Close launcher">×</button>
+          </div>
+        </header>
+        <header class="brand-lockup">
+          <div class="brand-title">PALWORLD</div>
+          <div class="launcher-title">PalOlympics Launcher</div>
+          <div class="version">VER. 1.0.0</div>
+        </header>
+        <section class="game-actions" aria-label="Game actions">
+          <button id="detect-btn" class="ornate-button detect-button" type="button">Detect game path</button>
+          <p id="path-display" class="path-display">Path: Not detected</p>
+          <button id="update-btn" class="download-button" type="button" disabled>Download &amp; Update</button>
+          <p id="game-status" class="game-status" role="status" aria-live="polite">Game: Not running</p>
+          <p id="status-display" class="status-display" role="status" aria-live="polite"></p>
+        </section>
+        <section class="modpack-label" aria-label="Modpack">PalOlympics<br />Modpack</section>
+        <aside class="config-panel" aria-labelledby="config-title">
+          <h1 id="config-title">Launcher Configuration</h1>
+          <nav class="settings-tabs" aria-label="Settings categories">
+            <button class="tab-btn active" data-tab="general" type="button">General</button>
+            <button class="tab-btn" data-tab="performance" type="button">Performance</button>
+            <button class="tab-btn" data-tab="maintenance" type="button">Maintenance</button>
+            <button class="tab-btn" data-tab="connections" type="button">Links</button>
+          </nav>
+
+          <!-- General Tab -->
+          <div class="tab-panel active" id="tab-general">
+            <section class="config-group">
+              <h2>Core Settings</h2>
+              <label for="server-address">Multiplayer Server:</label>
+              <input id="server-address" type="text" value="reminded-serial.tun.ply.gg:37404" />
+              <div class="setting-row"><label for="auto-launch-toggle">Auto-Launch Game when Ready:</label><input id="auto-launch-toggle" class="toggle-input" type="checkbox" /></div>
+              <div class="setting-row"><label for="auto-update-toggle">Auto-Check Modpack Updates:</label><input id="auto-update-toggle" class="toggle-input" type="checkbox" /></div>
+              <div class="setting-row"><label for="tray-toggle">Minimize to System Tray on Close:</label><input id="tray-toggle" class="toggle-input" type="checkbox" checked /></div>
+              <div class="setting-row"><label for="animations-toggle">Disable Launcher Animations:</label><input id="animations-toggle" class="toggle-input" type="checkbox" /></div>
+              <button id="check-updates-btn" class="action-button secondary" type="button" style="margin-top: 10px;">🔄 Check for Launcher Updates</button>
+              <p id="launcher-update-status" class="status-chip" role="status"></p>
+            </section>
+            <section class="config-group audio-group">
+              <h2>Audio</h2>
+              <label for="volume-slider">Launcher Sound &amp; Music</label>
+              <div class="volume-row"><span aria-hidden="true">◖</span><input id="volume-slider" type="range" min="0" max="100" value="60" /><output id="volume-value" for="volume-slider">60%</output></div>
+              <div class="setting-row"><label for="mute-toggle">Mute All Launcher Sounds:</label><input id="mute-toggle" class="toggle-input" type="checkbox" /></div>
+            </section>
+          </div>
+
+          <!-- Performance Tab -->
+          <div class="tab-panel" id="tab-performance">
+            <section class="config-group">
+              <h2>Process Optimization</h2>
+              <div class="setting-row">
+                <label for="auto-priority-toggle">Auto-High Process Priority:<span class="badge-chip">High</span></label>
+                <input id="auto-priority-toggle" class="toggle-input" type="checkbox" checked />
+              </div>
+              <p class="setting-hint">Automatically promotes Palworld game process to High priority using native Windows system calls.</p>
+              
+              <div class="setting-row">
+                <label for="hw-accel-toggle">Hardware Acceleration (GPU):<span id="fps-display" class="fps-badge">-- FPS</span></label>
+                <input id="hw-accel-toggle" class="toggle-input" type="checkbox" checked />
+              </div>
+            </section>
+            <section class="config-group">
+              <h2>Launch Settings &amp; Flags</h2>
+              <label for="startup-flags">Custom Startup Flags (Steam Protocol):</label>
+              <input id="startup-flags" type="text" value="-dx12 -high -USEALLAVAILABLECORES" />
+              <div class="preset-chips-label">Quick Performance Presets:</div>
+              <div class="preset-chips">
+                <button type="button" class="preset-chip" data-flag="-USEALLAVAILABLECORES">+ -USEALLAVAILABLECORES</button>
+                <button type="button" class="preset-chip" data-flag="-dx12">+ -dx12</button>
+                <button type="button" class="preset-chip" data-flag="-high">+ -high</button>
+                <button type="button" class="preset-chip" data-flag="-nomansky">+ -nomansky</button>
+              </div>
+            </section>
+          </div>
+
+          <!-- Maintenance & Backups Tab -->
+          <div class="tab-panel" id="tab-maintenance">
+            <section class="config-group">
+              <h2>System Maintenance</h2>
+              <p class="setting-hint">Clears Palworld shaders, crash dumps, and Minecraft temporary logs to free space and reduce stutters.</p>
+              <button id="clean-cache-btn" class="action-button" type="button">🧹 Clean Shaders &amp; Logs</button>
+              <p id="maintenance-status" class="status-chip" role="status"></p>
+            </section>
+            <section class="config-group">
+              <h2>Save Game Backups</h2>
+              <p class="setting-hint">Creates a timestamped zip archive of your local save game worlds.</p>
+              <label for="custom-save-path">Custom Save Path (Optional):</label>
+              <input id="custom-save-path" type="text" placeholder="Default: %LOCALAPPDATA%\Pal\Saved\SaveGames" />
+              <label for="backup-dir-path">Backup Storage Directory:</label>
+              <input id="backup-dir-path" type="text" placeholder="Default: %LOCALAPPDATA%\PalOlympicsLauncher\Backups" />
+              <div class="action-btn-row">
+                <button id="backup-saves-btn" class="action-button" type="button">📦 Backup Saves Now</button>
+                <button id="open-backups-btn" class="action-button secondary" type="button">📁 Open Backups</button>
+              </div>
+              <p id="backup-status" class="status-chip" role="status"></p>
+            </section>
+          </div>
+
+          <!-- Connections Tab -->
+          <div class="tab-panel" id="tab-connections">
+            <section class="config-group connections-group">
+              <h2>Connections</h2><p class="group-subtitle">Community &amp; Account Links</p>
+              <div class="connection-row"><button class="connection-button" data-connection="discord" type="button">Discord <span>Link Discord</span></button><button class="refresh-button" data-connection="discord" type="button" aria-label="Refresh Discord connection">↻</button></div>
+              <p id="discord-status" class="connection-status">Status: Not Linked</p>
+              <div class="connection-row"><button class="connection-button" data-connection="steam" type="button">Steam <span>Link Steam</span></button><button class="refresh-button" data-connection="steam" type="button" aria-label="Refresh Steam connection">↻</button></div>
+              <p id="steam-status" class="connection-status">Status: Not Linked</p>
+            </section>
+          </div>
+        </aside>
+
+        <!-- Native Update Prompt Modal -->
+        <div id="update-modal" class="update-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+          <div class="update-modal-backdrop"></div>
+          <div class="update-modal-card">
+            <div class="update-modal-header">
+              <span class="update-badge">Update Available</span>
+              <h2 id="update-modal-title">Launcher Update Ready</h2>
+            </div>
+            <div class="update-modal-body">
+              <p id="update-version-text" class="update-version-text">A new launcher version is available.</p>
+              <div id="update-notes" class="update-notes"></div>
+              <div id="update-progress-container" class="update-progress-container" style="display: none;">
+                <div class="update-progress-bar"><div id="update-progress-fill" class="update-progress-fill"></div></div>
+                <p id="update-progress-text" class="update-progress-text">Downloading update silently...</p>
+              </div>
+            </div>
+            <div class="update-modal-actions">
+              <button id="update-install-btn" class="action-button" type="button">Update &amp; Restart</button>
+              <button id="update-dismiss-btn" class="action-button secondary" type="button">Later</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
