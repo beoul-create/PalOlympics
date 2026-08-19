@@ -2,13 +2,8 @@
   "version": "1.0.0",
   "files": [
     {
-      "name": "dwmapi.dll",
-      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/main/binaries/dwmapi.dll",
-      "destination": "binaries"
-    },
-    {
       "name": "PalOlympics-Mods.zip",
-      "url": "https://github.com/beoul-create/PalOlympics/raw/refs/heads/main/PalOlympics-Mods.zip",
+      "url": "https://raw.githubusercontent.com/beoul-create/PalOlympics/main/PalOlympics-Mods.zip",
       "destination": "ue4ss_mods_zip"
     }
   ]
