@@ -10,7 +10,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{Manager, State, WindowEvent};
+use tauri::{Emitter, Manager, State, WindowEvent};
 use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -232,6 +232,8 @@ pub struct LauncherConfig {
     pub auto_connect: bool,
     #[serde(default = "default_true")]
     pub minimize_to_tray: bool,
+    #[serde(default)]
+    pub close_on_game_launch: bool,
     #[serde(default = "default_true")]
     pub hardware_acceleration: bool,
     #[serde(default)]
@@ -273,6 +275,7 @@ impl Default for LauncherConfig {
             server_password: default_server_password(),
             auto_connect: true,
             minimize_to_tray: true,
+            close_on_game_launch: false,
             hardware_acceleration: true,
             disable_animations: false,
             auto_process_priority: true,
@@ -470,29 +473,7 @@ mod win_process {
     pub fn set_process_priority_high(_pid: u32) -> Result<(), String> { Ok(()) }
 }
 
-pub fn start_process_priority_worker(enabled: std::sync::Arc<AtomicBool>) {
-    let _ = std::thread::Builder::new()
-        .name("process-priority-watcher".into())
-        .spawn(move || {
-            let mut boosted = std::collections::HashSet::new();
-            loop {
-                std::thread::sleep(Duration::from_secs(10));
-                if !enabled.load(Ordering::Relaxed) {
-                    continue;
-                }
-                let running = win_process::find_game_pids();
-                boosted.retain(|pid| running.contains(pid));
-                for pid in running {
-                    if !boosted.contains(&pid) {
-                        if let Ok(()) = win_process::set_process_priority_high(pid) {
-                            println!("[Process Priority] Elevated Palworld PID {} to High Priority", pid);
-                            boosted.insert(pid);
-                        }
-                    }
-                }
-            }
-        });
-}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MaintenanceReport {
@@ -527,6 +508,25 @@ fn run_system_maintenance() -> Result<MaintenanceReport, String> {
         // Minecraft temporary logs & crash reports
         target_dirs.push(PathBuf::from(&appdata).join(".minecraft").join("logs"));
         target_dirs.push(PathBuf::from(&appdata).join(".minecraft").join("crash-reports"));
+    }
+
+    let config = load_config();
+    if !config.game_path.is_empty() {
+        let ue4ss_log = PathBuf::from(&config.game_path)
+            .join("Pal")
+            .join("Binaries")
+            .join("Win64")
+            .join("ue4ss")
+            .join("UE4SS.log");
+        if ue4ss_log.is_file() {
+            if let Ok(meta) = fs::metadata(&ue4ss_log) {
+                let size = meta.len();
+                if fs::remove_file(&ue4ss_log).is_ok() {
+                    files_removed += 1;
+                    bytes_freed += size;
+                }
+            }
+        }
     }
 
     for dir in target_dirs {
@@ -699,6 +699,23 @@ fn open_backup_folder(target_backup_dir: Option<String>) -> Result<(), String> {
     Ok(())
 }
 
+fn build_engine_ini_optimization_string(
+    pool_size_mb: u32,
+    gc_time_secs: u32,
+    async_time_ms: u32,
+    enable_d3d12_async: bool,
+) -> String {
+    let d3d12_section = if enable_d3d12_async {
+        "D3D12.UseAsyncCompute=1\nD3D12.AllowMultiEngine=1\n"
+    } else {
+        ""
+    };
+
+    format!(
+        "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\n{d3d12_section}r.Streaming.PoolSize={pool_size_mb}\nr.Streaming.LimitPoolSizeToVRAM=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.Streaming.AmortizeCPUToGPUCopy=1\nr.Streaming.DefragDynamicBounds=1\nr.Streaming.CheckResourcesWithMissingMesh=0\nr.Streaming.MaxEffectiveScreenSize=0\nr.Streaming.MaxNumTexturesToStreamPerCycle=3\nr.TextureStreaming=1\nr.bForceCPUAccessToGPUBuffer=0\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\nr.ShaderPipelineCache.SaveAfterInitialLoad=1\nr.ShaderPipelineCache.PreCompile=1\nr.VolumetricFog=1\nr.VolumetricFog.GridPixelSize=16\nr.VolumetricFog.GridSizeZ=64\nr.VolumetricCloud=1\nr.VolumetricCloud.ViewRaySampleCountScale=0.5\nr.VolumetricCloud.Shadow.ViewRaySampleCountScale=0.5\nr.Shadow.Virtual.Enable=0\nr.Shadow.CSM.MaxCascades=3\nr.Shadow.MaxResolution=2048\nr.MotionBlurQuality=0\nr.DepthOfFieldQuality=0\nr.SceneColorFmt=6\nr.Tonemapper.GrainQuantization=0\nr.OneFrameThreadLag=1\nfx.Niagara.AllowAsyncTick=1\nau.DisableSeamlessLooping=0\ngc.IncrementalBeginDestroyEnabled=True\ngc.CreateGCClusters=True\ngc.NumRetriesBeforeForcingGC=10\ngc.MinDesiredObjectsPerSubTask=20\ngc.TimeBetweenPurgingPendingKillObjects={gc_time_secs}\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime={async_time_ms}\ns.AsyncLoadingUseFullTimeLimit=0\ns.PriorityAsyncLoadingExtraTime=15.0\ns.LevelStreamingActorsUpdateTimeLimit=5.0\ns.PriorityLevelStreamingActorsUpdateExtraTime=5.0\ns.UnregisterComponentsTimeLimit=1.0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n"
+    )
+}
+
 #[tauri::command]
 fn apply_engine_optimizations(enabled: bool) -> Result<String, String> {
     let local_appdata = std::env::var("LOCALAPPDATA").unwrap_or_default();
@@ -721,22 +738,45 @@ fn apply_engine_optimizations(enabled: bool) -> Result<String, String> {
     };
 
     if enabled {
-        let opt_section = "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\nr.Streaming.PoolSize=4096\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\ngc.TimeBetweenPurgingPendingKillObjects=90\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime=20\nr.TextureStreaming=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.bForceCPUAccessToGPUBuffer=0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n";
-        
-        // Remove older blocking r.CreateShadersOnLoad=1 or partial configs if present
-        if content.contains("r.CreateShadersOnLoad=1") || !content.contains("r.Streaming.PoolSize=4096") {
-            if let Some(pos) = content.find("[/Script/Engine.Engine]") {
-                content.truncate(pos);
-            }
-            content.push_str(opt_section);
-            fs::write(&engine_ini_path, &content).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
-            Ok("Engine.ini UI responsiveness, 4GB texture streaming pool, async shader, and memory optimizations applied successfully.".into())
-        } else {
-            Ok("Engine.ini optimizations already active.".into())
+        if let Some(pos) = content.find("[/Script/Engine.Engine]") {
+            content.truncate(pos);
         }
+        let opt_section = build_engine_ini_optimization_string(4096, 90, 20, true);
+        content.push_str(&opt_section);
+        fs::write(&engine_ini_path, &content).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
+        Ok("Engine.ini high-performance tuning (Async Compute, 4GB Texture Pool, Incremental GC, Volumetric Optimization) applied successfully.".into())
     } else {
-        Ok("Engine optimizations unchanged.".into())
+        if let Some(pos) = content.find("[/Script/Engine.Engine]") {
+            content.truncate(pos);
+            let _ = fs::write(&engine_ini_path, &content);
+        }
+        Ok("Engine optimizations reset to default.".into())
     }
+}
+
+#[tauri::command]
+fn reset_engine_ini() -> Result<String, String> {
+    let local_appdata = std::env::var("LOCALAPPDATA").unwrap_or_default();
+    if local_appdata.is_empty() {
+        return Err("LOCALAPPDATA environment variable not found".into());
+    }
+
+    let config_dir = PathBuf::from(&local_appdata)
+        .join("Pal")
+        .join("Saved")
+        .join("Config")
+        .join("Windows");
+
+    let engine_ini_path = config_dir.join("Engine.ini");
+    if engine_ini_path.exists() {
+        let mut content = fs::read_to_string(&engine_ini_path).unwrap_or_default();
+        if let Some(pos) = content.find("[/Script/Engine.Engine]") {
+            content.truncate(pos);
+            fs::write(&engine_ini_path, content.trim_end()).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
+        }
+    }
+
+    Ok("Engine.ini reverted to default configuration.".into())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -842,17 +882,17 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
         (
             "Ultra Enthusiast Profile".to_string(),
             "ULTRA TIER".to_string(),
-            "-dx12 -USEALLAVAILABLECORES -useperfthreads".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -useperfthreads -NoVerifyGC".to_string(),
             4096,
-            "Calibrated for high-end multi-threaded hardware. Unlocks a 4GB texture streaming budget, DirectX 12 Ultimate pipeline, and rapid level streaming.".to_string(),
+            "Calibrated for high-end multi-threaded hardware. Unlocks a 4GB texture streaming budget, DirectX 12 Async Compute, P-Core thread allocation, and non-blocking incremental GC.".to_string(),
         )
     } else if ram_gb >= 15.0 && cpu_threads >= 8 {
         (
             "High Performance Gaming Profile".to_string(),
             "HIGH TIER".to_string(),
-            "-dx12 -USEALLAVAILABLECORES".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -useperfthreads".to_string(),
             3072,
-            "Balanced for modern gaming PCs. 3GB texture streaming pool with async shader compilation and 8+ thread distribution.".to_string(),
+            "Balanced for modern gaming PCs. 3GB texture streaming pool with D3D12 Async Compute, optimized volumetric fog, and 8+ thread distribution.".to_string(),
         )
     } else if ram_gb >= 8.0 && cpu_threads >= 4 {
         (
@@ -860,7 +900,7 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
             "MAINSTREAM TIER".to_string(),
             "-dx12 -USEALLAVAILABLECORES -nomansky".to_string(),
             2048,
-            "Optimized for smooth framerates on mainstream systems. Disables background sky overhead and allocates 2GB streaming cache.".to_string(),
+            "Optimized for smooth framerates on mainstream systems. Disables background sky overhead, allocates 2GB streaming cache, and scales volumetric raymarching.".to_string(),
         )
     } else {
         (
@@ -913,20 +953,20 @@ fn apply_calibrated_profile(profile: CalibrationResult) -> Result<String, String
     let pool_size = profile.recommended_pool_mb;
     let gc_time = if pool_size >= 4096 { 120 } else if pool_size >= 3072 { 90 } else if pool_size >= 2048 { 60 } else { 45 };
     let async_time = if pool_size >= 4096 { 20 } else if pool_size >= 3072 { 15 } else if pool_size >= 2048 { 10 } else { 5 };
+    let enable_async_compute = pool_size >= 2048;
 
-    let opt_section = format!(
-        "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\nr.Streaming.PoolSize={pool_size}\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\ngc.TimeBetweenPurgingPendingKillObjects={gc_time}\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime={async_time}\nr.TextureStreaming=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.bForceCPUAccessToGPUBuffer=0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n"
-    );
+    let opt_section = build_engine_ini_optimization_string(pool_size, gc_time, async_time, enable_async_compute);
 
     content.push_str(&opt_section);
     fs::write(&engine_ini_path, &content).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
 
-    Ok(format!("Successfully applied {} ({}MB Pool) to Engine.ini!", profile.tier, pool_size))
+    Ok(format!("Successfully applied {} ({}MB Pool, Async Compute, Incremental GC) to Engine.ini!", profile.tier, pool_size))
 }
 
 struct LauncherState {
     minimize_to_tray: AtomicBool,
     auto_process_priority: std::sync::Arc<AtomicBool>,
+    close_on_game_launch: std::sync::Arc<AtomicBool>,
     discord_presence_tx: Mutex<Option<Sender<IpcCommand>>>,
     start_time: u64,
 }
@@ -954,6 +994,7 @@ fn get_launcher_config() -> LauncherConfig {
 fn update_launcher_config(config: LauncherConfig, state: State<'_, LauncherState>) -> Result<(), String> {
     state.minimize_to_tray.store(config.minimize_to_tray, Ordering::Relaxed);
     state.auto_process_priority.store(config.auto_process_priority, Ordering::Relaxed);
+    state.close_on_game_launch.store(config.close_on_game_launch, Ordering::Relaxed);
     save_config(&config)?;
     Ok(())
 }
@@ -1224,7 +1265,6 @@ async fn download_and_install_launcher_update(app: tauri::AppHandle) -> Result<S
                 .await
                 .map_err(|e| format!("In-app download & install failed: {e}"))?;
             app.restart();
-            return Ok("Update installed successfully. Restarting launcher into updated version...".into());
         }
     }
 
@@ -1360,6 +1400,7 @@ fn launch_game(
     startup_flags: String,
     server_address: String,
     server_password: Option<String>,
+    window: tauri::Window,
     state: State<'_, LauncherState>,
 ) -> Result<String, String> {
     let base_dir = PathBuf::from(&game_path);
@@ -1414,6 +1455,14 @@ fn launch_game(
         };
         open_browser(&steam_url)
             .map_err(|err| format!("Failed to launch game directly ({e}) and via Steam protocol: {err}"))?;
+    }
+
+    if state.close_on_game_launch.load(Ordering::Relaxed) {
+        let win = window.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(800));
+            let _ = win.hide();
+        });
     }
 
     let is_local_host = !win_process::find_server_pids().is_empty();
@@ -1902,6 +1951,61 @@ fn extract_zip_to_directory(zip_bytes: &[u8], extract_to: &Path) -> Result<(), S
     Ok(())
 }
 
+pub fn start_game_lifecycle_and_priority_watcher(
+    app_handle: tauri::AppHandle,
+    auto_priority: std::sync::Arc<AtomicBool>,
+    close_on_launch: std::sync::Arc<AtomicBool>,
+) {
+    let _ = std::thread::Builder::new()
+        .name("game-lifecycle-priority-watcher".into())
+        .spawn(move || {
+            let mut was_game_running = false;
+            let mut boosted_pids = std::collections::HashSet::new();
+
+            loop {
+                std::thread::sleep(Duration::from_millis(1500));
+                let running = win_process::find_game_pids();
+                let is_running = !running.is_empty();
+
+                if is_running {
+                    if !was_game_running {
+                        was_game_running = true;
+                        if close_on_launch.load(Ordering::Relaxed) {
+                            if let Some(window) = app_handle.get_webview_window("main") {
+                                let _ = window.hide();
+                            }
+                        }
+                    }
+
+                    // Promote process priority to High for any new PID
+                    if auto_priority.load(Ordering::Relaxed) {
+                        boosted_pids.retain(|pid| running.contains(pid));
+                        for pid in &running {
+                            if !boosted_pids.contains(pid) {
+                                if let Ok(()) = win_process::set_process_priority_high(*pid) {
+                                    boosted_pids.insert(*pid);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    boosted_pids.clear();
+                    if was_game_running {
+                        was_game_running = false;
+                        if close_on_launch.load(Ordering::Relaxed) {
+                            if let Some(window) = app_handle.get_webview_window("main") {
+                                let _ = window.show();
+                                let _ = window.unminimize();
+                                let _ = window.set_focus();
+                                let _ = window.emit("game-exited", ());
+                            }
+                        }
+                    }
+                }
+            }
+        });
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Uncap WebView2 frame rate and force high-performance GPU rasterization for >60 FPS displays (120Hz/144Hz/240Hz)
@@ -1922,7 +2026,7 @@ pub fn run() {
 
     let initial_config = load_config();
     let auto_priority = std::sync::Arc::new(AtomicBool::new(initial_config.auto_process_priority));
-    start_process_priority_worker(auto_priority.clone());
+    let close_on_launch = std::sync::Arc::new(AtomicBool::new(initial_config.close_on_game_launch));
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -1930,7 +2034,8 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(LauncherState {
             minimize_to_tray: AtomicBool::new(initial_config.minimize_to_tray),
-            auto_process_priority: auto_priority,
+            auto_process_priority: auto_priority.clone(),
+            close_on_game_launch: close_on_launch.clone(),
             discord_presence_tx: Mutex::new(Some(tx)),
             start_time,
         })
@@ -1956,9 +2061,13 @@ pub fn run() {
             download_and_install_launcher_update,
             open_browser_link,
             calibrate_hardware_profile,
-            apply_calibrated_profile
+            apply_calibrated_profile,
+            reset_engine_ini
         ])
-        .setup(|app| {
+        .setup(move |app| {
+            let app_handle = app.handle().clone();
+            start_game_lifecycle_and_priority_watcher(app_handle, auto_priority.clone(), close_on_launch.clone());
+
             let show_item = MenuItem::with_id(app, "show", "Show Launcher", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Quit Launcher", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
@@ -2040,6 +2149,7 @@ mod tests {
         assert_eq!(config.startup_flags, parsed.startup_flags);
         assert_eq!(config.auto_process_priority, parsed.auto_process_priority);
         assert_eq!(config.minimize_to_tray, parsed.minimize_to_tray);
+        assert_eq!(config.close_on_game_launch, parsed.close_on_game_launch);
     }
 
     #[test]

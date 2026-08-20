@@ -98,16 +98,17 @@ body.no-animations * {
 .game-status[data-running="true"] { color: #08733d; }
 .status-display { position: static; width: 100%; min-height: 16px; margin: 4px 0 0; color: #0b557a; font: 600 11px/1.4 "Trebuchet MS", sans-serif; text-align: left; word-break: break-all; }
 
-/* Right Column: Launcher Configuration Panel (Zero-Scroll Layout) */
+/* Right Column: Launcher Configuration Panel (Scrollable Within Fixed Card) */
 .config-panel {
   position: absolute;
   top: 54px;
   right: 4vw;
   width: min(520px, 40vw);
-  height: auto;
-  max-height: calc(100vh - 74px);
-  overflow: hidden; /* Zero scrollbars */
-  padding: 20px 24px;
+  max-height: calc(100vh - 84px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 24px 16px;
   border: 1px solid rgba(255, 255, 255, .7);
   border-radius: 20px;
   color: #071b2b;
@@ -120,14 +121,77 @@ body.no-animations * {
   pointer-events: auto;
   -webkit-app-region: no-drag !important;
 }
-.settings-tabs { position: relative; z-index: 50; display: flex; gap: 4px; margin-bottom: 14px; padding: 4px; border-radius: 10px; background: rgba(7, 27, 43, .08); border: 1px solid rgba(7, 27, 43, .1); pointer-events: auto !important; -webkit-app-region: no-drag !important; }
-.tab-btn { flex: 1; padding: 8px 3px; border: 0; border-radius: 7px; color: #0b3d60; background: transparent; font: 700 11px "Trebuchet MS", sans-serif; letter-spacing: .03em; cursor: pointer !important; transition: all .15s ease; user-select: none; pointer-events: auto !important; -webkit-app-region: no-drag !important; }
+.config-panel h1 {
+  flex: 0 0 auto;
+  margin: 0 0 10px;
+}
+.settings-tabs {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 50;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(7, 27, 43, .08);
+  border: 1px solid rgba(7, 27, 43, .1);
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 3px;
+  border: 0;
+  border-radius: 7px;
+  color: #0b3d60;
+  background: transparent;
+  font: 700 11px "Trebuchet MS", sans-serif;
+  letter-spacing: .03em;
+  cursor: pointer !important;
+  transition: all .15s ease;
+  user-select: none;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
 .tab-btn:hover { color: #071b2b; background: rgba(7, 27, 43, .08); }
 .tab-btn.active { color: #071b2b; background: #ffffff; box-shadow: 0 2px 8px rgba(7, 27, 43, .18); font-weight: 800; }
-.tab-panel { display: none; animation: fadeIn .2s ease; pointer-events: auto !important; -webkit-app-region: no-drag !important; }
-.tab-panel.active { display: block; }
-.tab-panel { display: none; animation: fadeIn .2s ease; }
-.tab-panel.active { display: block; }
+.tab-panel {
+  display: none;
+  animation: fadeIn .2s ease;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag !important;
+}
+.tab-panel.active {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  margin-right: -4px;
+  overscroll-behavior: contain;
+}
+/* Custom Scrollbar inside Tab Panels */
+.tab-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.tab-panel::-webkit-scrollbar-track {
+  background: rgba(7, 27, 43, 0.04);
+  border-radius: 6px;
+}
+.tab-panel::-webkit-scrollbar-thumb {
+  background: rgba(11, 85, 122, 0.32);
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+.tab-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 85, 122, 0.6);
+}
+.tab-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 85, 122, 0.32) rgba(7, 27, 43, 0.04);
+}
 @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 .config-group { margin-bottom: 14px; }
 .config-group h2 { margin: 0 0 6px; color: #0b557a; font: 800 12px "Trebuchet MS", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
@@ -1034,6 +1098,22 @@ body.theme-crimson .brand-title {
   border-color: #dc2626 !important;
 }
 
+body.theme-gold .tab-panel::-webkit-scrollbar-thumb { background: rgba(217, 119, 6, 0.4); }
+body.theme-gold .tab-panel::-webkit-scrollbar-thumb:hover { background: rgba(217, 119, 6, 0.7); }
+body.theme-gold .tab-panel { scrollbar-color: rgba(217, 119, 6, 0.4) rgba(7, 27, 43, 0.04); }
+
+body.theme-violet .tab-panel::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.4); }
+body.theme-violet .tab-panel::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.7); }
+body.theme-violet .tab-panel { scrollbar-color: rgba(124, 58, 237, 0.4) rgba(7, 27, 43, 0.04); }
+
+body.theme-emerald .tab-panel::-webkit-scrollbar-thumb { background: rgba(5, 150, 105, 0.4); }
+body.theme-emerald .tab-panel::-webkit-scrollbar-thumb:hover { background: rgba(5, 150, 105, 0.7); }
+body.theme-emerald .tab-panel { scrollbar-color: rgba(5, 150, 105, 0.4) rgba(7, 27, 43, 0.04); }
+
+body.theme-crimson .tab-panel::-webkit-scrollbar-thumb { background: rgba(220, 38, 38, 0.4); }
+body.theme-crimson .tab-panel::-webkit-scrollbar-thumb:hover { background: rgba(220, 38, 38, 0.7); }
+body.theme-crimson .tab-panel { scrollbar-color: rgba(220, 38, 38, 0.4) rgba(7, 27, 43, 0.04); }
+
 /* ==========================================================================
    Self-Calibrating System Optimizer Card
    ========================================================================== */
@@ -1121,6 +1201,12 @@ body.theme-crimson .brand-title {
 .calibration-footer .action-button {
   margin: 0;
   white-space: nowrap;
+}
+
+.calibration-footer-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 

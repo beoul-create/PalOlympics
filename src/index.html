@@ -38,7 +38,7 @@
           <header class="brand-lockup">
             <div class="brand-title">PALWORLD</div>
             <div class="launcher-title">PalOlympics Launcher</div>
-            <div class="version">VER. 0.1.4</div>
+            <div class="version">VER. 0.1.5</div>
           </header>
           <section class="game-actions" aria-label="Game actions">
             <button id="detect-btn" class="ornate-button detect-button" type="button">Detect game path</button>
@@ -153,6 +153,7 @@
               <h2>Launcher Preferences</h2>
               <div class="setting-row"><label for="auto-launch-toggle">Auto-Launch Game when Ready:</label><input id="auto-launch-toggle" class="toggle-input" type="checkbox" /></div>
               <div class="setting-row"><label for="auto-update-toggle">Auto-Check Modpack Updates:</label><input id="auto-update-toggle" class="toggle-input" type="checkbox" /></div>
+              <div class="setting-row"><label for="close-on-launch-toggle">Close Launcher on Launch (Reopen on Exit):</label><input id="close-on-launch-toggle" class="toggle-input" type="checkbox" /></div>
               <div class="setting-row"><label for="tray-toggle">Minimize to System Tray on Close:</label><input id="tray-toggle" class="toggle-input" type="checkbox" checked /></div>
               <div class="setting-row"><label for="animations-toggle">Disable Launcher Animations:</label><input id="animations-toggle" class="toggle-input" type="checkbox" /></div>
               <button id="check-updates-btn" class="action-button secondary" type="button" style="margin-top: 14px;">🔄 Check for Launcher Updates</button>
@@ -255,7 +256,10 @@
                 <p id="calibration-summary" class="calibration-summary-text">Analyzing hardware topology...</p>
                 <div class="calibration-footer">
                   <span id="calibration-status" class="file-path-badge">Ready to apply</span>
-                  <button id="apply-calibration-btn" class="action-button secondary" type="button">✓ Apply Calibrated Settings</button>
+                  <div class="calibration-footer-actions">
+                    <button id="apply-calibration-btn" class="action-button secondary" type="button">✓ Apply Calibrated Settings</button>
+                    <button id="reset-engine-ini-btn" class="action-button secondary" type="button" title="Revert Engine.ini to default">🔄 Reset</button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -281,6 +285,8 @@
               <div class="preset-chips">
                 <button type="button" class="preset-chip" data-flag="-USEALLAVAILABLECORES">+ -USEALLAVAILABLECORES</button>
                 <button type="button" class="preset-chip" data-flag="-dx12">+ -dx12</button>
+                <button type="button" class="preset-chip" data-flag="-useperfthreads">+ -useperfthreads</button>
+                <button type="button" class="preset-chip" data-flag="-NoVerifyGC">+ -NoVerifyGC</button>
                 <button type="button" class="preset-chip" data-flag="-high">+ -high</button>
                 <button type="button" class="preset-chip" data-flag="-nomansky">+ -nomansky</button>
               </div>

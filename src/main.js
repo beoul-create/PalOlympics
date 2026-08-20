@@ -172,6 +172,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const tabPanels = document.querySelectorAll(".tab-panel");
   const autoLaunchToggle = document.querySelector("#auto-launch-toggle");
   const autoUpdateToggle = document.querySelector("#auto-update-toggle");
+  const closeOnLaunchToggle = document.querySelector("#close-on-launch-toggle");
   const autoPriorityToggle = document.querySelector("#auto-priority-toggle");
   const customSavePathInput = document.querySelector("#custom-save-path");
   const backupDirPathInput = document.querySelector("#backup-dir-path");
@@ -1085,6 +1086,7 @@ window.addEventListener("DOMContentLoaded", () => {
         server_password: serverPasswordInput ? serverPasswordInput.value : "0331BAZEEY",
         auto_connect: true,
         minimize_to_tray: trayToggle ? trayToggle.checked : true,
+        close_on_game_launch: closeOnLaunchToggle ? closeOnLaunchToggle.checked : false,
         hardware_acceleration: hwAccelToggle ? hwAccelToggle.checked : true,
         disable_animations: animationsToggle ? animationsToggle.checked : false,
         auto_process_priority: autoPriorityToggle ? autoPriorityToggle.checked : true,
@@ -1149,6 +1151,9 @@ window.addEventListener("DOMContentLoaded", () => {
         serverPasswordInput.value = config.server_password;
       }
       if (trayToggle) trayToggle.checked = config.minimize_to_tray;
+      if (closeOnLaunchToggle && config.close_on_game_launch !== undefined) {
+        closeOnLaunchToggle.checked = config.close_on_game_launch;
+      }
       if (hwAccelToggle) hwAccelToggle.checked = config.hardware_acceleration;
       if (animationsToggle) {
         animationsToggle.checked = config.disable_animations;
@@ -1265,7 +1270,23 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [autoLaunchToggle, autoUpdateToggle, trayToggle, serverAddressInput, serverPasswordInput, customSavePathInput, backupDirPathInput].forEach((el) => {
+  const resetEngineIniBtn = document.querySelector("#reset-engine-ini-btn");
+  if (resetEngineIniBtn) {
+    resetEngineIniBtn.addEventListener("click", async () => {
+      resetEngineIniBtn.disabled = true;
+      if (calibrationStatus) calibrationStatus.textContent = "Reverting Engine.ini...";
+      try {
+        const msg = await invoke("reset_engine_ini");
+        if (calibrationStatus) calibrationStatus.textContent = `✓ ${msg}`;
+      } catch (err) {
+        if (calibrationStatus) calibrationStatus.textContent = `Reset failed: ${err}`;
+      } finally {
+        resetEngineIniBtn.disabled = false;
+      }
+    });
+  }
+
+  [autoLaunchToggle, autoUpdateToggle, closeOnLaunchToggle, trayToggle, serverAddressInput, serverPasswordInput, customSavePathInput, backupDirPathInput].forEach((el) => {
     if (el) {
       el.addEventListener("change", saveLauncherConfig);
       el.addEventListener("input", saveLauncherConfig);
@@ -1503,6 +1524,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Check for updates automatically on startup (non-blocking)
   checkForLauncherUpdates(true);
+
+  const listenEvent = (eventName, callback) => {
+    try {
+      if (window.__TAURI__ && window.__TAURI__.event && window.__TAURI__.event.listen) {
+        return window.__TAURI__.event.listen(eventName, callback);
+      }
+    } catch (_) {}
+    return Promise.resolve(() => {});
+  };
+
+  listenEvent("game-exited", () => {
+    refreshGameStatus();
+  });
 
   let statusInterval = window.setInterval(refreshGameStatus, 10000);
   document.addEventListener("visibilitychange", () => {
