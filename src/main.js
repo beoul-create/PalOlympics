@@ -224,36 +224,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const appWindow = getTauriWindow();
 
   // Tab navigation is handled by inline onclick="window.switchLauncherTab(...)" in index.html
-
-  const updatePresetChipStates = () => {
-    if (!startupFlagsInput) return;
-    const current = startupFlagsInput.value;
-    presetChips.forEach((chip) => {
-      const flag = chip.dataset.flag;
-      if (current.includes(flag)) {
-        chip.classList.add("active");
-        chip.textContent = `✓ ${flag}`;
-      } else {
-        chip.classList.remove("active");
-        chip.textContent = `+ ${flag}`;
-      }
-    });
-  };
-
-  presetChips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      const flag = chip.dataset.flag;
-      let val = startupFlagsInput.value.trim();
-      if (val.includes(flag)) {
-        val = val.replace(flag, "").replace(/\s+/g, " ").trim();
-      } else {
-        val = `${val} ${flag}`.trim();
-      }
-      startupFlagsInput.value = val;
-      updatePresetChipStates();
-      saveLauncherConfig();
-    });
-  });
+  // Preset chips and settings are initialized below in settings section
 
   // saveLauncherConfig and loadLauncherConfig are defined further below (after theme/customization setup)
 
@@ -623,7 +594,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
   initGifInterpolator();
 
-  const applyBackgroundMode = () => {
+  function applyBackgroundMode() {
     stopCloudAnimations();
     cancelCanvasLoop();
 
@@ -677,7 +648,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       startCloudAnimations();
     }
-  };
+  }
 
   // Check if a 60fps MP4/WebM video loop is available in assets
   const candidateVideos = ["./assets/launcher-bg.mp4", "./assets/launcher-bg.webm"];
