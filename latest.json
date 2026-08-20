@@ -1,19 +1,19 @@
 {
   "version": "0.1.6",
   "notes": "Auto-calibrated startup flags & streaming pools, background 30 FPS mode, base camp CPU reduction, fast travel blackout reducer, storage caching, tray auto-mute, and 25% CPU idle fix.",
-  "pub_date": "2026-08-20T14:55:00Z",
+  "pub_date": "2026-08-20T16:08:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFp0ZUsrdVRzaCt2a1BEdnJrTXFtNmVRN0xNTmJJSE5IMXloUTF6bTU0WTZ4WFRRNG1qK3VpWDd0OEVRL1dLK0J5N1BNVk5rZG9BL2pZMFpYTlFFWHc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTczCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0X2VuLVVTLm1zaQo4TzRTOUtob2VENW13cDZYRGp6aUhPRndsWkNsZmRjM0Z0Uzc4MGxGSVJZbllhanl0d1Qzb3pwYWx4NnJiUnBta1dpeWdVcUNxVlBsSE9scTV3MmZEUT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFpHZGhuUExGeTZJTGFFWE5qODAyemJ0RThCNjE1ZVZjOHFOMTNJWE1Gd00zbU9vK2NJRXYrOHVGTmhwZkFrRmRPN3ovQ0FUNnNMZllvVk1lZGNncHdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjQ0MDM2CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjZfeDY0X2VuLVVTLm1zaQp6bHFoajFmUldiMGtjY2FGLzJWdXpJWDZ3SElqMW0vR3FPZE5CeFlpL3hxdWltaWpNeUMvTnduRzNjdEdnTy9xa0tFbGwvYnhKcllzVGxzR2dCb1RDUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.6/PalOlympics.Launcher_0.1.6_x64_en-US.msi"
     },
     "windows-x86_64-msi": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFp0ZUsrdVRzaCt2a1BEdnJrTXFtNmVRN0xNTmJJSE5IMXloUTF6bTU0WTZ4WFRRNG1qK3VpWDd0OEVRL1dLK0J5N1BNVk5rZG9BL2pZMFpYTlFFWHc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTczCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0X2VuLVVTLm1zaQo4TzRTOUtob2VENW13cDZYRGp6aUhPRndsWkNsZmRjM0Z0Uzc4MGxGSVJZbllhanl0d1Qzb3pwYWx4NnJiUnBta1dpeWdVcUNxVlBsSE9scTV3MmZEUT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFpHZGhuUExGeTZJTGFFWE5qODAyemJ0RThCNjE1ZVZjOHFOMTNJWE1Gd00zbU9vK2NJRXYrOHVGTmhwZkFrRmRPN3ovQ0FUNnNMZllvVk1lZGNncHdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjQ0MDM2CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjZfeDY0X2VuLVVTLm1zaQp6bHFoajFmUldiMGtjY2FGLzJWdXpJWDZ3SElqMW0vR3FPZE5CeFlpL3hxdWltaWpNeUMvTnduRzNjdEdnTy9xa0tFbGwvYnhKcllzVGxzR2dCb1RDUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.6/PalOlympics.Launcher_0.1.6_x64_en-US.msi"
     },
     "windows-x86_64-nsis": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGZnNnhINTBHRFFCL3hLbDV1RGVDQzBuYmljSUJEbE54NHdWZGFrMnJiaGNEMENsenhtMW5XQXdUU253NUJlT3U0TUhzSEM5c1E2SW1qaVlIS3FHOEFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTc2CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0LXNldHVwLmV4ZQo1RjdPbGVnVWVpalQ2U0FPY3RhZ2prL0ttbHk1Nmk3bENtd2xMYWtJSEswcDVSLzBpajVBbFBBUVZJS3BmNWZ6Z3BVT2dlN1ZxQ2pWODlrSEw1UEVEUT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFYrOERSQlBIbWNWTDRMUkFsbzRQdVNwSWNvYndMbG1rMDRzekVIVlVnaVNCTnRGRFF2ZFBweFVwR0NXVzlFUFQyVEdNK1A3YUJGdGF6U3BjTDJJQmdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjQ0MDM1CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjZfeDY0LXNldHVwLmV4ZQpJSVhjK21ZakV2a0hST1VpSENVcms4WTdLaXc5UW9vcjdtV21ncmJWQUxvWFhid241ejhlbkN3eFBMVW9hU0IrNzZJaVYrY1JqYnFReFJPcnlIYXVEdz09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.6/PalOlympics.Launcher_0.1.6_x64-setup.exe"
     }
   }
 }
