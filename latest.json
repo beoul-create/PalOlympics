@@ -1,19 +1,19 @@
 {
-  "version": "0.1.7",
+  "version": "0.1.8",
   "notes": "v0.1.7: Minimal in-game & window branding, dynamic UMG fast travel & loading hooks, base camp multi-Pal worker optimization, Niagara combat FX async culling, contact shadow bypass, audio concurrency limit, and UE4SS level streaming stability.",
-  "pub_date": "2026-08-20T18:26:59.827Z",
+  "pub_date": "2026-08-20T19:01:31.185Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFN6K0dsekcvNThHczJxQUV6UEpvK3VOalpaTE05eFVyemJPaEkwaS9ML3Y0TENmbWR5a2E2d3dTc3BXUUFZRjB4aStJZ1EzYVdrQzRJdngyWWJ0UGdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUwNDE5CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjdfeDY0X2VuLVVTLm1zaQoxZmEvTXAyamRkR2drRldEaUx0aDdWcDNLaHJhMVNQcmZCc1N3RTJSakRGcUorZWN2UGt0OFdXMmFtUkNkdlM5Zm5VUVJFcFk5QlVEL0srdXVZcXdDUT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.7/PalOlympics.Launcher_0.1.7_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGFaZUc2dW5ISDF2d1YvQTArdUdNQ3BYRnUzdklZbzlXd3dyQWpPZVo0YW5VbzBZdEY1L0RxRFl5KzdkczdmYXNSRGdiUzA0a3ZZWTZreVIyd21KRFE4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDkxCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0X2VuLVVTLm1zaQpmVk50a0x4VU9GS1hSWjh2bXR3dXlaK2ZLWTltNjJ4Ym1RYzYrL1BUU0JzQ2NUYmF2TXZrUWw2aEZlaEpDWVBoM1dxS3YrKzJhZGZwdEs0K3RpRm1DQT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64_en-US.msi"
     },
     "windows-x86_64-msi": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFN6K0dsekcvNThHczJxQUV6UEpvK3VOalpaTE05eFVyemJPaEkwaS9ML3Y0TENmbWR5a2E2d3dTc3BXUUFZRjB4aStJZ1EzYVdrQzRJdngyWWJ0UGdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUwNDE5CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjdfeDY0X2VuLVVTLm1zaQoxZmEvTXAyamRkR2drRldEaUx0aDdWcDNLaHJhMVNQcmZCc1N3RTJSakRGcUorZWN2UGt0OFdXMmFtUkNkdlM5Zm5VUVJFcFk5QlVEL0srdXVZcXdDUT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.7/PalOlympics.Launcher_0.1.7_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGFaZUc2dW5ISDF2d1YvQTArdUdNQ3BYRnUzdklZbzlXd3dyQWpPZVo0YW5VbzBZdEY1L0RxRFl5KzdkczdmYXNSRGdiUzA0a3ZZWTZreVIyd21KRFE4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDkxCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0X2VuLVVTLm1zaQpmVk50a0x4VU9GS1hSWjh2bXR3dXlaK2ZLWTltNjJ4Ym1RYzYrL1BUU0JzQ2NUYmF2TXZrUWw2aEZlaEpDWVBoM1dxS3YrKzJhZGZwdEs0K3RpRm1DQT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64_en-US.msi"
     },
     "windows-x86_64-nsis": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGJQcXNCbEhhZkVZaTFiVE1IalY4dVE2MGluRk9EaTZUeGtCakhpdFJTdmJsQXZ3bUFSR2xVNWhLbzFWUUp1RzBBdnJLU1liUDBvcEFzSjJXcWZJbmdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUwNDE1CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjdfeDY0LXNldHVwLmV4ZQpyVXFRcFdhNXp2S25HdFRPVTM3K3JCTzFXRnJLTVA3V3U0SmlHUk9idW5vNDVSUlBzd0hRUVFGV2xmenIwMW1lTzdXWTZFVUROcnlBcjdnM2kzbXlBdz09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.7/PalOlympics.Launcher_0.1.7_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFgyTzBDVk1WQzhhWUtXc01kT2E5Q1ZlYldrNHdUUVNYVlFETlRmVDhXL1JlcElNdEQwUXNtVHhaQ29lQ3B0TGp5QXJ0UTF2SmFzMGJOZmx5cW5Za3dJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDg5CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0LXNldHVwLmV4ZQpLbmVIVXpER3lxNkxJTGJtVm9vYm91SC9LakpFNzRybDU2YTgvd3pLdHdhVUNuYTA3czZ5c2YrV1BSZG9QWWkzQTNDTkpOTlBNVWVSMGE4eE5qQ1ZEdz09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64-setup.exe"
     }
   }
 }
