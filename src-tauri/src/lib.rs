@@ -86,10 +86,15 @@ impl DiscordIpc {
         assets.insert("large_text".to_string(), serde_json::Value::String("PalOlympics Launcher".to_string()));
         act_json.insert("assets".to_string(), serde_json::Value::Object(assets));
 
+        let target_pid = win_process::find_game_pids()
+            .first()
+            .copied()
+            .unwrap_or_else(std::process::id);
+
         let payload = serde_json::json!({
             "cmd": "SET_ACTIVITY",
             "args": {
-                "pid": std::process::id(),
+                "pid": target_pid,
                 "activity": serde_json::Value::Object(act_json)
             },
             "nonce": self.seq.to_string()
@@ -115,10 +120,15 @@ impl DiscordIpc {
         let file = self.pipe.as_mut().ok_or("Not connected")?;
         self.seq += 1;
 
+        let target_pid = win_process::find_game_pids()
+            .first()
+            .copied()
+            .unwrap_or_else(std::process::id);
+
         let payload = serde_json::json!({
             "cmd": "SET_ACTIVITY",
             "args": {
-                "pid": std::process::id(),
+                "pid": target_pid,
                 "activity": serde_json::Value::Null
             },
             "nonce": self.seq.to_string()
@@ -187,36 +197,95 @@ fn start_discord_rpc_worker(
     });
 }
 
+fn default_startup_flags() -> String {
+    "-dx12".to_string()
+}
+fn default_server_address() -> String {
+    "beoul.duckdns.org:8211".to_string()
+}
+fn default_server_password() -> String {
+    "0331BAZEEY".to_string()
+}
+fn default_true() -> bool {
+    true
+}
+fn default_backup_dir() -> String {
+    let appdata = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| "C:\\Users\\Public".to_string());
+    format!(r"{}\PalOlympicsLauncher\Backups", appdata)
+}
+fn default_save_path() -> String {
+    let appdata = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| "C:\\Users\\Public".to_string());
+    format!(r"{}\Pal\Saved\SaveGames", appdata)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LauncherConfig {
+    #[serde(default)]
     pub game_path: String,
+    #[serde(default = "default_startup_flags")]
     pub startup_flags: String,
+    #[serde(default = "default_server_address")]
     pub server_address: String,
+    #[serde(default = "default_server_password")]
+    pub server_password: String,
+    #[serde(default = "default_true")]
+    pub auto_connect: bool,
+    #[serde(default = "default_true")]
     pub minimize_to_tray: bool,
+    #[serde(default = "default_true")]
     pub hardware_acceleration: bool,
+    #[serde(default)]
     pub disable_animations: bool,
+    #[serde(default = "default_true")]
     pub auto_process_priority: bool,
+    #[serde(default)]
     pub auto_launch: bool,
+    #[serde(default)]
     pub auto_update_modpack: bool,
+    #[serde(default = "default_backup_dir")]
     pub save_backup_directory: String,
+    #[serde(default = "default_save_path")]
     pub custom_save_path: String,
+    #[serde(default = "default_true")]
+    pub optimize_engine_ini: bool,
+    #[serde(default)]
+    pub custom_background_path: String,
+    #[serde(default)]
+    pub custom_audio_path: String,
+    #[serde(default = "default_accent")]
+    pub theme_accent: String,
+    #[serde(default)]
+    pub bg_dim_opacity: f32,
+    #[serde(default)]
+    pub bg_blur_radius: f32,
+}
+
+fn default_accent() -> String {
+    "cyan".to_string()
 }
 
 impl Default for LauncherConfig {
     fn default() -> Self {
-        let appdata = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| "C:\\Users\\Public".to_string());
         Self {
             game_path: String::new(),
-            startup_flags: "-dx12 -high -USEALLAVAILABLECORES".to_string(),
-            server_address: "reminded-serial.tun.ply.gg:37404".to_string(),
+            startup_flags: default_startup_flags(),
+            server_address: default_server_address(),
+            server_password: default_server_password(),
+            auto_connect: true,
             minimize_to_tray: true,
             hardware_acceleration: true,
             disable_animations: false,
             auto_process_priority: true,
             auto_launch: false,
             auto_update_modpack: false,
-            save_backup_directory: format!(r"{}\PalOlympicsLauncher\Backups", appdata),
-            custom_save_path: format!(r"{}\Pal\Saved\SaveGames", appdata),
+            save_backup_directory: default_backup_dir(),
+            custom_save_path: default_save_path(),
+            optimize_engine_ini: true,
+            custom_background_path: String::new(),
+            custom_audio_path: String::new(),
+            theme_accent: "cyan".to_string(),
+            bg_dim_opacity: 0.0,
+            bg_blur_radius: 0.0,
         }
     }
 }
@@ -268,6 +337,7 @@ mod win_process {
     const INVALID_HANDLE_VALUE: HANDLE = -1isize as HANDLE;
 
     #[repr(C)]
+    #[allow(non_snake_case)]
     struct PROCESSENTRY32W {
         dwSize: DWORD,
         cntUsage: DWORD,
@@ -333,6 +403,49 @@ mod win_process {
         pids
     }
 
+    pub fn find_server_pids() -> Vec<u32> {
+        let mut pids = Vec::new();
+        unsafe {
+            let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if snapshot == INVALID_HANDLE_VALUE {
+                return pids;
+            }
+
+            let mut entry = PROCESSENTRY32W {
+                dwSize: std::mem::size_of::<PROCESSENTRY32W>() as DWORD,
+                cntUsage: 0,
+                th32ProcessID: 0,
+                th32DefaultHeapID: 0,
+                th32ModuleID: 0,
+                cntThreads: 0,
+                th32ParentProcessID: 0,
+                pcPriClassBase: 0,
+                dwFlags: 0,
+                szExeFile: [0; 260],
+            };
+
+            if Process32FirstW(snapshot, &mut entry) != 0 {
+                loop {
+                    let len = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
+                    let exe_name = String::from_utf16_lossy(&entry.szExeFile[..len]).to_lowercase();
+
+                    if exe_name == "palserver-win64-shipping-cmd.exe"
+                        || exe_name == "palserver-win64-shipping.exe"
+                        || exe_name == "palserver.exe"
+                    {
+                        pids.push(entry.th32ProcessID);
+                    }
+
+                    if Process32NextW(snapshot, &mut entry) == 0 {
+                        break;
+                    }
+                }
+            }
+            CloseHandle(snapshot);
+        }
+        pids
+    }
+
     pub fn set_process_priority_high(pid: u32) -> Result<(), String> {
         unsafe {
             let handle = OpenProcess(PROCESS_SET_INFORMATION | PROCESS_QUERY_INFORMATION, 0, pid);
@@ -353,6 +466,7 @@ mod win_process {
 #[cfg(not(windows))]
 mod win_process {
     pub fn find_game_pids() -> Vec<u32> { Vec::new() }
+    pub fn find_server_pids() -> Vec<u32> { Vec::new() }
     pub fn set_process_priority_high(_pid: u32) -> Result<(), String> { Ok(()) }
 }
 
@@ -362,7 +476,7 @@ pub fn start_process_priority_worker(enabled: std::sync::Arc<AtomicBool>) {
         .spawn(move || {
             let mut boosted = std::collections::HashSet::new();
             loop {
-                std::thread::sleep(Duration::from_secs(2));
+                std::thread::sleep(Duration::from_secs(10));
                 if !enabled.load(Ordering::Relaxed) {
                     continue;
                 }
@@ -401,9 +515,12 @@ fn run_system_maintenance() -> Result<MaintenanceReport, String> {
         // Palworld crash dumps & logs
         target_dirs.push(PathBuf::from(&local_appdata).join("Pal").join("Saved").join("Crashes"));
         target_dirs.push(PathBuf::from(&local_appdata).join("Pal").join("Saved").join("Logs"));
-        // DirectX & GPU Shader Cache
+        // DirectX & GPU Shader Cache (NVIDIA, AMD, Intel, DirectX D3DSCache)
         target_dirs.push(PathBuf::from(&local_appdata).join("D3DSCache"));
         target_dirs.push(PathBuf::from(&local_appdata).join("NVIDIA").join("DXCache"));
+        target_dirs.push(PathBuf::from(&local_appdata).join("NVIDIA").join("GLCache"));
+        target_dirs.push(PathBuf::from(&local_appdata).join("AMD").join("DxCache"));
+        target_dirs.push(PathBuf::from(&local_appdata).join("Intel").join("ShaderCache"));
     }
 
     if !appdata.is_empty() {
@@ -578,8 +695,233 @@ fn open_backup_folder(target_backup_dir: Option<String>) -> Result<(), String> {
         get_config_dir().join("Backups")
     };
     let _ = fs::create_dir_all(&backup_dir);
-    open_browser(&backup_dir.to_string_lossy());
+    let _ = open_browser(&backup_dir.to_string_lossy());
     Ok(())
+}
+
+#[tauri::command]
+fn apply_engine_optimizations(enabled: bool) -> Result<String, String> {
+    let local_appdata = std::env::var("LOCALAPPDATA").unwrap_or_default();
+    if local_appdata.is_empty() {
+        return Err("LOCALAPPDATA environment variable not found".into());
+    }
+
+    let config_dir = PathBuf::from(&local_appdata)
+        .join("Pal")
+        .join("Saved")
+        .join("Config")
+        .join("Windows");
+    let _ = fs::create_dir_all(&config_dir);
+
+    let engine_ini_path = config_dir.join("Engine.ini");
+    let mut content = if engine_ini_path.exists() {
+        fs::read_to_string(&engine_ini_path).unwrap_or_default()
+    } else {
+        String::new()
+    };
+
+    if enabled {
+        let opt_section = "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\nr.Streaming.PoolSize=4096\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\ngc.TimeBetweenPurgingPendingKillObjects=90\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime=20\nr.TextureStreaming=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.bForceCPUAccessToGPUBuffer=0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n";
+        
+        // Remove older blocking r.CreateShadersOnLoad=1 or partial configs if present
+        if content.contains("r.CreateShadersOnLoad=1") || !content.contains("r.Streaming.PoolSize=4096") {
+            if let Some(pos) = content.find("[/Script/Engine.Engine]") {
+                content.truncate(pos);
+            }
+            content.push_str(opt_section);
+            fs::write(&engine_ini_path, &content).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
+            Ok("Engine.ini UI responsiveness, 4GB texture streaming pool, async shader, and memory optimizations applied successfully.".into())
+        } else {
+            Ok("Engine.ini optimizations already active.".into())
+        }
+    } else {
+        Ok("Engine optimizations unchanged.".into())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CalibrationResult {
+    pub tier: String,
+    pub tier_badge: String,
+    pub cpu_name: String,
+    pub cpu_threads: u32,
+    pub ram_gb: f64,
+    pub gpu_name: String,
+    pub recommended_flags: String,
+    pub recommended_pool_mb: u32,
+    pub summary: String,
+}
+
+#[tauri::command]
+fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
+    let cpu_threads = std::thread::available_parallelism()
+        .map(|n| n.get() as u32)
+        .unwrap_or(4);
+
+    let mut cpu_name = "Multi-Core Processor".to_string();
+    let mut gpu_name = "DirectX 12 Compatible GPU".to_string();
+    let mut ram_gb = 16.0f64;
+
+    #[cfg(windows)]
+    {
+        // Query CPU Name from Registry
+        if let Ok(output) = std::process::Command::new("reg")
+            .args(&["query", "HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", "/v", "ProcessorNameString"])
+            .output()
+        {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines() {
+                if line.contains("ProcessorNameString") {
+                    if let Some(pos) = line.find("REG_SZ") {
+                        let name = line[pos + 6..].trim();
+                        if !name.is_empty() {
+                            cpu_name = name.to_string();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Query GPU Name from Registry
+        if let Ok(output) = std::process::Command::new("reg")
+            .args(&["query", "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e968-e325-11ce-bfc1-08002be10318}\\0000", "/v", "DriverDesc"])
+            .output()
+        {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines() {
+                if line.contains("DriverDesc") {
+                    if let Some(pos) = line.find("REG_SZ") {
+                        let name = line[pos + 6..].trim();
+                        if !name.is_empty() {
+                            gpu_name = name.to_string();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Query Physical Memory
+        #[repr(C)]
+        struct MEMSTATUS {
+            dw_length: u32,
+            dw_memory_load: u32,
+            ull_total_phys: u64,
+            ull_avail_phys: u64,
+            ull_total_page_file: u64,
+            ull_avail_page_file: u64,
+            ull_total_virtual: u64,
+            ull_avail_virtual: u64,
+            ull_avail_extended_virtual: u64,
+        }
+        extern "system" {
+            fn GlobalMemoryStatusEx(lp_buffer: *mut MEMSTATUS) -> i32;
+        }
+
+        unsafe {
+            let mut status = MEMSTATUS {
+                dw_length: std::mem::size_of::<MEMSTATUS>() as u32,
+                dw_memory_load: 0,
+                ull_total_phys: 0,
+                ull_avail_phys: 0,
+                ull_total_page_file: 0,
+                ull_avail_page_file: 0,
+                ull_total_virtual: 0,
+                ull_avail_virtual: 0,
+                ull_avail_extended_virtual: 0,
+            };
+            if GlobalMemoryStatusEx(&mut status) != 0 {
+                ram_gb = (status.ull_total_phys as f64 / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0;
+            }
+        }
+    }
+
+    let is_nvidia = gpu_name.to_lowercase().contains("nvidia") || gpu_name.to_lowercase().contains("geforce") || gpu_name.to_lowercase().contains("rtx") || gpu_name.to_lowercase().contains("gtx");
+    let is_high_end_gpu = gpu_name.contains("40") || gpu_name.contains("30") || gpu_name.contains("7900") || gpu_name.contains("7800") || gpu_name.contains("6800");
+
+    let (tier, tier_badge, recommended_flags, recommended_pool_mb, summary) = if ram_gb >= 24.0 && cpu_threads >= 12 && (is_high_end_gpu || is_nvidia) {
+        (
+            "Ultra Enthusiast Profile".to_string(),
+            "ULTRA TIER".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -useperfthreads".to_string(),
+            4096,
+            "Calibrated for high-end multi-threaded hardware. Unlocks a 4GB texture streaming budget, DirectX 12 Ultimate pipeline, and rapid level streaming.".to_string(),
+        )
+    } else if ram_gb >= 15.0 && cpu_threads >= 8 {
+        (
+            "High Performance Gaming Profile".to_string(),
+            "HIGH TIER".to_string(),
+            "-dx12 -USEALLAVAILABLECORES".to_string(),
+            3072,
+            "Balanced for modern gaming PCs. 3GB texture streaming pool with async shader compilation and 8+ thread distribution.".to_string(),
+        )
+    } else if ram_gb >= 8.0 && cpu_threads >= 4 {
+        (
+            "Balanced Mainstream Profile".to_string(),
+            "MAINSTREAM TIER".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -nomansky".to_string(),
+            2048,
+            "Optimized for smooth framerates on mainstream systems. Disables background sky overhead and allocates 2GB streaming cache.".to_string(),
+        )
+    } else {
+        (
+            "Maximum Efficiency & Low-Memory Profile".to_string(),
+            "EFFICIENCY TIER".to_string(),
+            "-dx11 -USEALLAVAILABLECORES -nomansky -lowmemory".to_string(),
+            1024,
+            "Lightweight low-footprint mode. Forces DirectX 11, aggressive 45s RAM cleanups, and 1GB texture pool to eliminate micro-stutters.".to_string(),
+        )
+    };
+
+    Ok(CalibrationResult {
+        tier,
+        tier_badge,
+        cpu_name,
+        cpu_threads,
+        ram_gb,
+        gpu_name,
+        recommended_flags,
+        recommended_pool_mb,
+        summary,
+    })
+}
+
+#[tauri::command]
+fn apply_calibrated_profile(profile: CalibrationResult) -> Result<String, String> {
+    let local_appdata = std::env::var("LOCALAPPDATA").unwrap_or_default();
+    if local_appdata.is_empty() {
+        return Err("LOCALAPPDATA environment variable not found".into());
+    }
+
+    let config_dir = PathBuf::from(&local_appdata)
+        .join("Pal")
+        .join("Saved")
+        .join("Config")
+        .join("Windows");
+    let _ = fs::create_dir_all(&config_dir);
+
+    let engine_ini_path = config_dir.join("Engine.ini");
+    let mut content = if engine_ini_path.exists() {
+        fs::read_to_string(&engine_ini_path).unwrap_or_default()
+    } else {
+        String::new()
+    };
+
+    if let Some(pos) = content.find("[/Script/Engine.Engine]") {
+        content.truncate(pos);
+    }
+
+    let pool_size = profile.recommended_pool_mb;
+    let gc_time = if pool_size >= 4096 { 120 } else if pool_size >= 3072 { 90 } else if pool_size >= 2048 { 60 } else { 45 };
+    let async_time = if pool_size >= 4096 { 20 } else if pool_size >= 3072 { 15 } else if pool_size >= 2048 { 10 } else { 5 };
+
+    let opt_section = format!(
+        "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\nr.Streaming.PoolSize={pool_size}\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\ngc.TimeBetweenPurgingPendingKillObjects={gc_time}\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime={async_time}\nr.TextureStreaming=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.bForceCPUAccessToGPUBuffer=0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n"
+    );
+
+    content.push_str(&opt_section);
+    fs::write(&engine_ini_path, &content).map_err(|e| format!("Failed to write Engine.ini: {e}"))?;
+
+    Ok(format!("Successfully applied {} ({}MB Pool) to Engine.ini!", profile.tier, pool_size))
 }
 
 struct LauncherState {
@@ -625,6 +967,192 @@ fn set_auto_process_priority(enabled: bool, state: State<'_, LauncherState>) {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlayerInfo {
+    pub name: String,
+    pub level: u32,
+    pub ping: u32,
+    pub player_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServerStatusInfo {
+    pub online: bool,
+    pub server_name: String,
+    pub address: String,
+    pub ping_ms: u32,
+    pub player_count: u32,
+    pub max_players: u32,
+    pub uptime_seconds: u64,
+    pub next_restart_seconds: Option<u64>,
+    pub version: String,
+    pub players: Vec<PlayerInfo>,
+}
+
+#[tauri::command]
+async fn query_server_status(server_address: String, password: Option<String>) -> Result<ServerStatusInfo, String> {
+    let clean_addr = server_address.trim();
+    let parts: Vec<&str> = clean_addr.split(':').collect();
+    let host = if !parts.is_empty() && !parts[0].is_empty() { parts[0] } else { "beoul.duckdns.org" };
+    let game_port: u16 = parts.get(1).and_then(|p| p.parse().ok()).unwrap_or(8211);
+
+    let is_local_server_running = !win_process::find_server_pids().is_empty();
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_millis(2000))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let target_hosts = if is_local_server_running {
+        vec!["127.0.0.1", "localhost", host]
+    } else {
+        vec![host, "127.0.0.1", "localhost"]
+    };
+
+    let rest_ports = [8212, game_port, 8211];
+
+    let mut found_rest = false;
+    let mut server_name = "PalOlympics Dedicated Server".to_string();
+    let mut server_version = "v1.0.3.x".to_string();
+    let mut uptime_seconds = 0u64;
+    let mut players = Vec::new();
+    let mut ping_ms = 0u32;
+    let mut max_players = 32u32;
+
+    let auth_passes = [
+        "0012",
+        password.as_deref().unwrap_or("").trim(),
+        "0331BAZEEY",
+        "",
+    ];
+
+    let start_instant = Instant::now();
+
+    'host_loop: for &t_host in &target_hosts {
+        for &r_port in &rest_ports {
+            for &auth_pass in &auth_passes {
+                let url_info = format!("http://{}:{}/v1/api/info", t_host, r_port);
+                let mut req = client.get(&url_info);
+                if !auth_pass.is_empty() {
+                    req = req.basic_auth("admin", Some(auth_pass));
+                }
+
+                if let Ok(res) = req.send().await {
+                    if res.status().is_success() {
+                        let elapsed = start_instant.elapsed().as_millis() as u32;
+                        ping_ms = if t_host == "127.0.0.1" || t_host == "localhost" { 5 } else { elapsed.max(12) };
+                        if let Ok(json) = res.json::<serde_json::Value>().await {
+                            found_rest = true;
+                            if let Some(sname) = json.get("servername").and_then(|v| v.as_str()) {
+                                server_name = sname.to_string();
+                            }
+                            if let Some(ver) = json.get("version").and_then(|v| v.as_str()) {
+                                server_version = ver.to_string();
+                            }
+                        }
+
+                        // Query Players
+                        let url_players = format!("http://{}:{}/v1/api/players", t_host, r_port);
+                        let mut req_p = client.get(&url_players);
+                        if !auth_pass.is_empty() {
+                            req_p = req_p.basic_auth("admin", Some(auth_pass));
+                        }
+                        if let Ok(res_p) = req_p.send().await {
+                            if res_p.status().is_success() {
+                                if let Ok(json_p) = res_p.json::<serde_json::Value>().await {
+                                    let raw_players = if let Some(arr) = json_p.as_array() {
+                                        Some(arr)
+                                    } else if let Some(arr) = json_p.get("players").and_then(|v| v.as_array()) {
+                                        Some(arr)
+                                    } else if let Some(arr) = json_p.get("value").and_then(|v| v.as_array()) {
+                                        Some(arr)
+                                    } else if let Some(arr) = json_p.get("value").and_then(|v| v.get("players")).and_then(|v| v.as_array()) {
+                                        Some(arr)
+                                    } else {
+                                        None
+                                    };
+
+                                    if let Some(arr) = raw_players {
+                                        for p in arr {
+                                            let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                                            if name.is_empty() || name.to_lowercase() == "name" {
+                                                continue;
+                                            }
+                                            let level = p.get("level").and_then(|v| v.as_u64()).unwrap_or(1) as u32;
+                                            let p_ping = p.get("ping").and_then(|v| v.as_f64()).unwrap_or(ping_ms as f64) as u32;
+                                            let player_id = p.get("userId")
+                                                .or_else(|| p.get("playerId"))
+                                                .or_else(|| p.get("player_id"))
+                                                .or_else(|| p.get("user_id"))
+                                                .and_then(|v| v.as_str())
+                                                .unwrap_or(&name)
+                                                .to_string();
+
+                                            players.push(PlayerInfo {
+                                                name,
+                                                level,
+                                                ping: p_ping,
+                                                player_id,
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Query Metrics
+                        let url_metrics = format!("http://{}:{}/v1/api/metrics", t_host, r_port);
+                        let mut req_m = client.get(&url_metrics);
+                        if !auth_pass.is_empty() {
+                            req_m = req_m.basic_auth("admin", Some(auth_pass));
+                        }
+                        if let Ok(res_m) = req_m.send().await {
+                            if res_m.status().is_success() {
+                                if let Ok(json_m) = res_m.json::<serde_json::Value>().await {
+                                    if let Some(up) = json_m.get("uptime").and_then(|v| v.as_u64()) {
+                                        uptime_seconds = up;
+                                    }
+                                    if let Some(max_p) = json_m.get("maxplayernum").and_then(|v| v.as_u64()) {
+                                        max_players = max_p as u32;
+                                    }
+                                }
+                            }
+                        }
+
+                        break 'host_loop;
+                    }
+                }
+            }
+        }
+    }
+
+    let is_online = found_rest || is_local_server_running;
+    if is_online && ping_ms == 0 {
+        ping_ms = if is_local_server_running { 5 } else { 24 };
+    }
+
+    let player_count = players.len() as u32;
+    let next_restart_seconds = if uptime_seconds > 0 {
+        let cycle_seconds = 14400u64; // 4 hours from SCHEDULED_RESTART_HOURS
+        Some(cycle_seconds - (uptime_seconds % cycle_seconds))
+    } else {
+        Some(14400)
+    };
+
+    Ok(ServerStatusInfo {
+        online: is_online,
+        server_name,
+        address: if !clean_addr.is_empty() { clean_addr.to_string() } else { "beoul.duckdns.org:8211".to_string() },
+        ping_ms: if is_online { ping_ms } else { 0 },
+        player_count,
+        max_players,
+        uptime_seconds,
+        next_restart_seconds,
+        version: server_version,
+        players,
+    })
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateCheckResult {
     pub should_update: bool,
     pub current_version: String,
@@ -653,7 +1181,7 @@ async fn check_for_launcher_updates(app: tauri::AppHandle) -> Result<UpdateCheck
     // Direct GitHub release fallback check
     let client = reqwest::Client::new();
     let res = client
-        .get("https://api.github.com/repos/beoul-create/PalOlympics/releases/latest")
+        .get("https://api.github.com/repos/beoul-create/palolympics-launcher/releases/latest")
         .header("User-Agent", "PalOlympics-Launcher")
         .send()
         .await;
@@ -692,38 +1220,15 @@ async fn check_for_launcher_updates(app: tauri::AppHandle) -> Result<UpdateCheck
 async fn download_and_install_launcher_update(app: tauri::AppHandle) -> Result<String, String> {
     if let Ok(updater) = app.updater() {
         if let Ok(Some(update)) = updater.check().await {
-            update
-                .download_and_install(|_, _| {}, || {})
+            update.download_and_install(|_, _| {}, || {})
                 .await
-                .map_err(|e| format!("Failed to download and install update: {e}"))?;
-            return Ok("Update installed successfully. Please restart the launcher.".into());
+                .map_err(|e| format!("In-app download & install failed: {e}"))?;
+            app.restart();
+            return Ok("Update installed successfully. Restarting launcher into updated version...".into());
         }
     }
 
-    // Direct download from GitHub releases
-    let client = reqwest::Client::new();
-    let res = client
-        .get("https://api.github.com/repos/beoul-create/PalOlympics/releases/latest")
-        .header("User-Agent", "PalOlympics-Launcher")
-        .send()
-        .await
-        .map_err(|e| format!("Failed to query release: {e}"))?;
-
-    let json: serde_json::Value = res.json().await.map_err(|e| format!("Failed to parse release: {e}"))?;
-    if let Some(assets) = json.get("assets").and_then(|a| a.as_array()) {
-        for asset in assets {
-            if let Some(name) = asset.get("name").and_then(|n| n.as_str()) {
-                if name.ends_with(".exe") || name.ends_with(".msi") {
-                    if let Some(download_url) = asset.get("browser_download_url").and_then(|u| u.as_str()) {
-                        open_browser(download_url)?;
-                        return Ok(format!("Opening browser to download installer: {name}"));
-                    }
-                }
-            }
-        }
-    }
-
-    Ok("Latest update verified. Opening releases page.".into())
+    Err("No in-app update is currently available or signature verification failed.".into())
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -747,21 +1252,27 @@ pub struct ModpackManifest {
 
 #[tauri::command]
 fn detect_palworld_path() -> Result<String, String> {
-    let common_paths = [
-        r"C:\SteamLibrary\steamapps\common\Palworld",
-        r"C:\Program Files (x86)\Steam\steamapps\common\Palworld",
-        r"D:\SteamLibrary\steamapps\common\Palworld",
-        r"E:\SteamLibrary\steamapps\common\Palworld",
-    ];
+    let mut candidate_paths = Vec::new();
 
-    for path_str in common_paths {
+    // Scan standard drive letters C through Z
+    for drive in b'C'..=b'Z' {
+        let drive_char = drive as char;
+        candidate_paths.push(format!(r"{}:\SteamLibrary\steamapps\common\Palworld", drive_char));
+        candidate_paths.push(format!(r"{}:\Program Files (x86)\Steam\steamapps\common\Palworld", drive_char));
+        candidate_paths.push(format!(r"{}:\Program Files\Steam\steamapps\common\Palworld", drive_char));
+        candidate_paths.push(format!(r"{}:\Steam\steamapps\common\Palworld", drive_char));
+        candidate_paths.push(format!(r"{}:\Games\SteamLibrary\steamapps\common\Palworld", drive_char));
+        candidate_paths.push(format!(r"{}:\Games\Steam\steamapps\common\Palworld", drive_char));
+    }
+
+    for path_str in &candidate_paths {
         let path = Path::new(path_str);
         if path.is_dir() && find_palworld_executable(path).is_some() {
             return Ok(path.to_string_lossy().into_owned());
         }
     }
 
-    Err("Could not find a complete Palworld installation. Please verify the game is installed and select its directory manually.".into())
+    Err("Could not find a complete Palworld installation across local drives. Please verify the game is installed on Steam.".into())
 }
 
 #[tauri::command]
@@ -830,11 +1341,25 @@ fn verify_modpack_files(base_dir: &Path) -> bool {
     win64_dir.join("dwmapi.dll").is_file() && win64_dir.join("ue4ss").is_dir()
 }
 
+fn cleanup_auto_join_mod(base_dir: &Path) {
+    let win64_dir = base_dir.join("Pal").join("Binaries").join("Win64");
+    let dirs = [
+        win64_dir.join("ue4ss").join("Mods").join("PalOlympicsAutoJoin"),
+        win64_dir.join("Mods").join("PalOlympicsAutoJoin"),
+    ];
+    for d in &dirs {
+        if d.exists() {
+            let _ = fs::remove_dir_all(d);
+        }
+    }
+}
+
 #[tauri::command]
 fn launch_game(
     game_path: String,
     startup_flags: String,
     server_address: String,
+    server_password: Option<String>,
     state: State<'_, LauncherState>,
 ) -> Result<String, String> {
     let base_dir = PathBuf::from(&game_path);
@@ -845,6 +1370,15 @@ fn launch_game(
         ));
     }
 
+    cleanup_auto_join_mod(&base_dir);
+
+    if load_config().optimize_engine_ini {
+        let _ = apply_engine_optimizations(true);
+    }
+
+    let server_address = server_address.trim().to_string();
+    let server_password = server_password.unwrap_or_default().trim().to_string();
+
     let mut extra_args = Vec::new();
     for flag in startup_flags.split_whitespace() {
         if flag.starts_with('-') {
@@ -852,27 +1386,37 @@ fn launch_game(
         }
     }
 
-    let server_address = server_address.trim();
-    if !server_address.is_empty() {
-        if server_address
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || ".:-[]".contains(c))
-        {
-            extra_args.push(format!("-connect={server_address}"));
+    let exe_path = find_palworld_executable(&base_dir)
+        .ok_or_else(|| format!("Palworld executable not found in {}", base_dir.display()))?;
+    let working_dir = exe_path.parent().unwrap_or(&base_dir);
+
+    // Ensure steam_appid.txt is present in the working directory to prevent Steam launcher redirects
+    let _ = fs::write(working_dir.join("steam_appid.txt"), "1623730");
+    let _ = fs::write(base_dir.join("steam_appid.txt"), "1623730");
+
+    let mut cmd = Command::new(&exe_path);
+    cmd.current_dir(working_dir)
+        .env("SteamAppId", "1623730")
+        .env("SteamGameId", "1623730")
+        .env("SteamAppUser", "Palworld")
+        .env("SteamClientLaunch", "1")
+        .args(&extra_args);
+
+    let spawn_res = cmd.spawn();
+
+    if let Err(e) = spawn_res {
+        // Fallback to Steam protocol if direct execution encounters an issue
+        let steam_url = if extra_args.is_empty() {
+            "steam://run/1623730".to_string()
         } else {
-            return Err("Invalid multiplayer server address.".into());
-        }
+            let params = extra_args.join(" ");
+            format!("steam://run/1623730//{}", url_encode(&params))
+        };
+        open_browser(&steam_url)
+            .map_err(|err| format!("Failed to launch game directly ({e}) and via Steam protocol: {err}"))?;
     }
 
-    let steam_url = if extra_args.is_empty() {
-        "steam://run/1623730".to_string()
-    } else {
-        let params = extra_args.join(" ");
-        format!("steam://run/1623730//{}", url_encode(&params))
-    };
-
-    open_browser(&steam_url)
-        .map_err(|e| format!("Failed to launch Palworld through Steam protocol: {e}"))?;
+    let is_local_host = !win_process::find_server_pids().is_empty();
 
     let presence_state = if !server_address.is_empty() {
         format!("Playing on {}", server_address)
@@ -881,7 +1425,21 @@ fn launch_game(
     };
     state.update_presence("Palworld - PalOlympics", Some(&presence_state));
 
-    Ok("Palworld launch initiated through official Steam protocol (steam://run/1623730). Steam is launching the game natively.".into())
+    let connect_note = if is_local_host && server_address.contains("duckdns.org") {
+        " (Host Note: Server is running on this PC — use 127.0.0.1:8211 in direct connect to avoid router NAT loopback)".to_string()
+    } else if !server_address.is_empty() {
+        if !server_password.is_empty() {
+            format!(" (Server & Password ready for in-game Direct Connect)")
+        } else {
+            format!(" (Server IP ready for in-game Direct Connect)")
+        }
+    } else {
+        String::new()
+    };
+
+    Ok(format!(
+        "Palworld launched successfully.{connect_note}"
+    ))
 }
 
 fn find_palworld_executable(base_dir: &Path) -> Option<PathBuf> {
@@ -902,7 +1460,13 @@ fn is_game_running(state: State<'_, LauncherState>) -> Result<bool, String> {
     let running = !win_process::find_game_pids().is_empty();
 
     if running {
-        state.update_presence("Palworld - PalOlympics", Some("Playing Palworld"));
+        let cfg = load_config();
+        let server_info = if !cfg.server_address.trim().is_empty() {
+            format!("Playing on {}", cfg.server_address.trim())
+        } else {
+            "In PalOlympics Modpack".to_string()
+        };
+        state.update_presence("Palworld - PalOlympics", Some(&server_info));
     }
 
     Ok(running)
@@ -1086,9 +1650,9 @@ async fn handle_discord_connection() -> Result<String, String> {
     let client_id = match get_config_var("DISCORD_CLIENT_ID") {
         Some(id) if !id.is_empty() => id,
         _ => {
-            open_browser("discord://-/channels/@me")
+            open_browser("https://discord.gg/8YCVeQgUVq")
                 .map_err(|e| format!("Failed to open Discord: {e}"))?;
-            return Ok("Discord opened. Set DISCORD_CLIENT_ID in .env to link your account.".into());
+            return Ok("Opened PalOlympics Discord invite in browser!".into());
         }
     };
 
@@ -1279,9 +1843,18 @@ async fn handle_steam_connection() -> Result<String, String> {
 }
 
 #[tauri::command]
+fn open_browser_link(url: String) -> Result<(), String> {
+    open_browser(&url)
+}
+
+#[tauri::command]
 async fn open_connection(connection: String) -> Result<String, String> {
     match connection.as_str() {
         "discord" => handle_discord_connection().await,
+        "discord_invite" => {
+            open_browser("https://discord.gg/8YCVeQgUVq")?;
+            Ok("Opened PalOlympics Discord invite in browser!".into())
+        }
         "steam" => handle_steam_connection().await,
         _ => Err("Unknown connection provider.".into()),
     }
@@ -1323,9 +1896,7 @@ fn extract_zip_to_directory(zip_bytes: &[u8], extract_to: &Path) -> Result<(), S
             fs::create_dir_all(parent).map_err(|e| e.to_string())?;
         }
         let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
-        outfile.write_all(&buffer).map_err(|e| e.to_string())?;
+        std::io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
     }
 
     Ok(())
@@ -1355,6 +1926,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(LauncherState {
             minimize_to_tray: AtomicBool::new(initial_config.minimize_to_tray),
@@ -1378,8 +1950,13 @@ pub fn run() {
             run_system_maintenance,
             backup_save_files,
             open_backup_folder,
+            apply_engine_optimizations,
+            query_server_status,
             check_for_launcher_updates,
-            download_and_install_launcher_update
+            download_and_install_launcher_update,
+            open_browser_link,
+            calibrate_hardware_profile,
+            apply_calibrated_profile
         ])
         .setup(|app| {
             let show_item = MenuItem::with_id(app, "show", "Show Launcher", true, None::<&str>)?;

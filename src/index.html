@@ -2,10 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PalOlympics Launcher</title>
-    <script type="module" src="/main.js" defer></script>
   </head>
 
   <body>
@@ -17,60 +16,250 @@
           <img class="launcher-background" src="./assets/launcher-bg.gif" alt="" />
           <img class="launcher-background" src="./assets/launcher-bg.gif" alt="" />
         </div>
+        <!-- Custom Background Layer (Image / Video) -->
+        <div id="custom-bg-container" class="custom-bg-container" style="display: none;" aria-hidden="true">
+          <img id="custom-bg-image" class="custom-bg-media" alt="" style="display: none;" />
+          <video id="custom-bg-video" class="custom-bg-media" autoplay loop muted playsinline style="display: none;"></video>
+        </div>
+        <!-- Backdrop Dimmer & Blur Filter -->
+        <div id="custom-bg-dimmer" class="custom-bg-dimmer" aria-hidden="true"></div>
         <div class="cloud-overlay cloud-overlay-high" aria-hidden="true"></div>
         <div class="cloud-overlay cloud-overlay-low" aria-hidden="true"></div>
         <header id="window-bar" class="window-bar">
-          <button id="drag-window-btn" class="window-bar-title" type="button" aria-label="Drag PalOlympics Launcher window">PalOlympics Launcher</button>
+          <div class="window-bar-left" data-tauri-drag-region>
+            <div id="drag-window-btn" class="window-bar-title" data-tauri-drag-region>PalOlympics Launcher</div>
+          </div>
           <div class="window-controls">
             <button id="minimize-btn" class="window-control" type="button" aria-label="Minimize launcher">−</button>
             <button id="close-btn" class="window-control close-control" type="button" aria-label="Close launcher">×</button>
           </div>
         </header>
-        <header class="brand-lockup">
-          <div class="brand-title">PALWORLD</div>
-          <div class="launcher-title">PalOlympics Launcher</div>
-          <div class="version">VER. 1.0.0</div>
-        </header>
-        <section class="game-actions" aria-label="Game actions">
-          <button id="detect-btn" class="ornate-button detect-button" type="button">Detect game path</button>
-          <p id="path-display" class="path-display">Path: Not detected</p>
-          <button id="update-btn" class="download-button" type="button" disabled>Download &amp; Update</button>
-          <p id="game-status" class="game-status" role="status" aria-live="polite">Game: Not running</p>
-          <p id="status-display" class="status-display" role="status" aria-live="polite"></p>
-        </section>
-        <section class="modpack-label" aria-label="Modpack">PalOlympics<br />Modpack</section>
+        <div class="launcher-left-panel">
+          <header class="brand-lockup">
+            <div class="brand-title">PALWORLD</div>
+            <div class="launcher-title">PalOlympics Launcher</div>
+            <div class="version">VER. 0.1.4</div>
+          </header>
+          <section class="game-actions" aria-label="Game actions">
+            <button id="detect-btn" class="ornate-button detect-button" type="button">Detect game path</button>
+            <p id="path-display" class="path-display">Path: Not detected</p>
+            <button id="update-btn" class="download-button" type="button" disabled>Download &amp; Update</button>
+            <p id="game-status" class="game-status" role="status" aria-live="polite">Game: Not running</p>
+            <p id="status-display" class="status-display" role="status" aria-live="polite"></p>
+          </section>
+
+          <!-- Live Server Board & Banner Under Download & Update -->
+          <section class="server-banner-card">
+            <div class="server-banner-header">
+              <div class="server-identity">
+                <div class="server-icon">🏰</div>
+                <div>
+                  <h2 class="server-name" id="board-server-name">PalOlympics Dedicated Server</h2>
+                  <div class="server-endpoints">
+                    <button type="button" class="endpoint-badge" id="board-server-ip" title="Click to copy Server IP">🌐 beoul.duckdns.org:8211</button>
+                    <button type="button" class="endpoint-badge discord-badge" id="board-discord-join-btn" title="Join Official PalOlympics Discord">💬 Join Discord</button>
+                  </div>
+                </div>
+              </div>
+              <div class="server-status-pill online" id="board-status-pill">
+                <span class="status-dot"></span>
+                <span id="board-status-text">ONLINE</span>
+              </div>
+            </div>
+
+            <!-- Server Live Metrics -->
+            <div class="server-metrics-grid">
+              <div class="metric-box">
+                <span class="metric-icon">📶</span>
+                <div class="metric-data">
+                  <span class="metric-label">Latency</span>
+                  <span class="metric-value" id="metric-ping">-- ms</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <span class="metric-icon">👥</span>
+                <div class="metric-data">
+                  <span class="metric-label">Online Players</span>
+                  <span class="metric-value" id="metric-players">0 / 32</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <span class="metric-icon">⏱️</span>
+                <div class="metric-data">
+                  <span class="metric-label">Server Uptime</span>
+                  <span class="metric-value" id="metric-uptime">Active</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <span class="metric-icon">🔄</span>
+                <div class="metric-data">
+                  <span class="metric-label">Restart Cycle</span>
+                  <span class="metric-value" id="metric-restart">4h Cycle</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Player Roster -->
+            <div class="player-roster-section">
+              <div class="roster-header">
+                <div class="roster-title">
+                  <span>👑 Live Player Roster</span>
+                  <span class="roster-count-badge" id="roster-count-badge">0 Online</span>
+                </div>
+                <button id="refresh-server-btn" class="refresh-btn" type="button" title="Refresh Live Server Board">🔄 Refresh</button>
+              </div>
+              <div class="roster-table-wrapper" id="roster-table-wrapper">
+                <table class="roster-table" id="roster-table">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Level</th>
+                      <th>Ping</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roster-tbody">
+                    <tr>
+                      <td colspan="4" class="roster-empty-cell">
+                        <div class="empty-roster-msg">
+                          <span>🎮 No players currently on the server. Ready for you to explore!</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Hidden inputs to preserve configuration bindings -->
+            <input id="server-address" type="hidden" value="beoul.duckdns.org:8211" />
+            <input id="server-password" type="hidden" value="0331BAZEEY" />
+          </section>
+        </div>
+
         <aside class="config-panel" aria-labelledby="config-title">
           <h1 id="config-title">Launcher Configuration</h1>
           <nav class="settings-tabs" aria-label="Settings categories">
-            <button class="tab-btn active" data-tab="general" type="button">General</button>
-            <button class="tab-btn" data-tab="performance" type="button">Performance</button>
-            <button class="tab-btn" data-tab="maintenance" type="button">Maintenance</button>
-            <button class="tab-btn" data-tab="connections" type="button">Links</button>
+            <button class="tab-btn active" data-tab="general" onclick="window.switchLauncherTab('general')" type="button">General</button>
+            <button class="tab-btn" data-tab="customization" onclick="window.switchLauncherTab('customization')" type="button">Theme &amp; Audio</button>
+            <button class="tab-btn" data-tab="performance" onclick="window.switchLauncherTab('performance')" type="button">Performance</button>
+            <button class="tab-btn" data-tab="maintenance" onclick="window.switchLauncherTab('maintenance')" type="button">Maintenance</button>
+            <button class="tab-btn" data-tab="connections" onclick="window.switchLauncherTab('connections')" type="button">Links</button>
           </nav>
 
           <!-- General Tab -->
           <div class="tab-panel active" id="tab-general">
             <section class="config-group">
-              <h2>Core Settings</h2>
-              <label for="server-address">Multiplayer Server:</label>
-              <input id="server-address" type="text" value="reminded-serial.tun.ply.gg:37404" />
+              <h2>Launcher Preferences</h2>
               <div class="setting-row"><label for="auto-launch-toggle">Auto-Launch Game when Ready:</label><input id="auto-launch-toggle" class="toggle-input" type="checkbox" /></div>
               <div class="setting-row"><label for="auto-update-toggle">Auto-Check Modpack Updates:</label><input id="auto-update-toggle" class="toggle-input" type="checkbox" /></div>
               <div class="setting-row"><label for="tray-toggle">Minimize to System Tray on Close:</label><input id="tray-toggle" class="toggle-input" type="checkbox" checked /></div>
               <div class="setting-row"><label for="animations-toggle">Disable Launcher Animations:</label><input id="animations-toggle" class="toggle-input" type="checkbox" /></div>
-              <button id="check-updates-btn" class="action-button secondary" type="button" style="margin-top: 10px;">🔄 Check for Launcher Updates</button>
+              <button id="check-updates-btn" class="action-button secondary" type="button" style="margin-top: 14px;">🔄 Check for Launcher Updates</button>
               <p id="launcher-update-status" class="status-chip" role="status"></p>
             </section>
+          </div>
+
+          <!-- Personalization & Customization Tab -->
+          <div class="tab-panel" id="tab-customization">
+            <!-- Theme Accent Colors -->
+            <section class="config-group">
+              <h2>Aesthetic Theme Accent</h2>
+              <p class="setting-hint">Choose your interface aura and glowing accent color.</p>
+              <div class="theme-palette-grid">
+                <button type="button" class="theme-chip active" data-theme="cyan">
+                  <span class="theme-swatch" style="background: #0284c7;"></span>
+                  <span>Celestial Cyan</span>
+                </button>
+                <button type="button" class="theme-chip" data-theme="gold">
+                  <span class="theme-swatch" style="background: #d97706;"></span>
+                  <span>Spark Gold</span>
+                </button>
+                <button type="button" class="theme-chip" data-theme="violet">
+                  <span class="theme-swatch" style="background: #7c3aed;"></span>
+                  <span>Astral Violet</span>
+                </button>
+                <button type="button" class="theme-chip" data-theme="emerald">
+                  <span class="theme-swatch" style="background: #059669;"></span>
+                  <span>Emerald Forest</span>
+                </button>
+                <button type="button" class="theme-chip" data-theme="crimson">
+                  <span class="theme-swatch" style="background: #dc2626;"></span>
+                  <span>Ember Crimson</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- Custom Background / Wallpaper -->
+            <section class="config-group">
+              <h2>Custom Wallpaper &amp; Background</h2>
+              <p class="setting-hint">Select a local image (.png, .jpg), animated GIF, or looping video (.mp4).</p>
+              <input id="custom-bg-input" type="file" accept="image/*,video/mp4,.gif,.webp" style="display:none;" />
+              <div class="custom-actions-row">
+                <button id="choose-bg-btn" class="action-button secondary" type="button">🖼️ Choose File...</button>
+                <button id="reset-bg-btn" class="action-button secondary" type="button">🔄 Reset Wallpaper</button>
+              </div>
+              <p id="custom-bg-status" class="file-path-badge">Current: Animated Realm Sky (Default)</p>
+
+              <!-- Dimming & Blur Sliders -->
+              <div class="slider-control-group">
+                <label for="bg-dim-slider">Background Dimming</label>
+                <div class="volume-row">
+                  <span aria-hidden="true">🌙</span>
+                  <input id="bg-dim-slider" type="range" min="0" max="80" value="0" />
+                  <output id="bg-dim-value" for="bg-dim-slider">0%</output>
+                </div>
+
+                <label for="bg-blur-slider">Background Soft Blur</label>
+                <div class="volume-row">
+                  <span aria-hidden="true">💧</span>
+                  <input id="bg-blur-slider" type="range" min="0" max="20" value="0" />
+                  <output id="bg-blur-value" for="bg-blur-slider">0px</output>
+                </div>
+              </div>
+            </section>
+
+            <!-- Custom Audio / BGM -->
             <section class="config-group audio-group">
-              <h2>Audio</h2>
-              <label for="volume-slider">Launcher Sound &amp; Music</label>
-              <div class="volume-row"><span aria-hidden="true">◖</span><input id="volume-slider" type="range" min="0" max="100" value="60" /><output id="volume-value" for="volume-slider">60%</output></div>
-              <div class="setting-row"><label for="mute-toggle">Mute All Launcher Sounds:</label><input id="mute-toggle" class="toggle-input" type="checkbox" /></div>
+              <h2>Launcher Music &amp; Soundtrack</h2>
+              <p class="setting-hint">Load your favorite custom soundtrack (.mp3, .wav, .ogg, .flac).</p>
+              <input id="custom-audio-input" type="file" accept="audio/*,.mp3,.wav,.ogg,.flac" style="display:none;" />
+              <div class="custom-actions-row">
+                <button id="choose-audio-btn" class="action-button secondary" type="button">🎵 Choose Custom Music...</button>
+                <button id="reset-audio-btn" class="action-button secondary" type="button">🔄 Default Theme Music</button>
+              </div>
+              <p id="custom-audio-status" class="file-path-badge">Current: Palworld Orchestral Theme (Default)</p>
             </section>
           </div>
 
           <!-- Performance Tab -->
           <div class="tab-panel" id="tab-performance">
+            <!-- Self-Calibrating Optimization Feature -->
+            <section class="config-group calibration-group">
+              <h2>⚡ Self-Calibrating System Optimizer</h2>
+              <p class="setting-hint">Scans your CPU, RAM, and GPU architecture to compute and apply tailored Engine.ini streaming pools and startup presets for your specific rig.</p>
+              <div class="custom-actions-row">
+                <button id="auto-calibrate-btn" class="action-button" type="button">⚡ Auto-Calibrate for My Hardware</button>
+              </div>
+              <div id="calibration-card" class="calibration-card" style="display:none;">
+                <div class="calibration-header">
+                  <span id="calibration-tier-badge" class="calibration-tier-badge">DETECTING...</span>
+                  <span id="calibration-tier-title" class="calibration-tier-title">System Profile</span>
+                </div>
+                <div class="calibration-specs-grid">
+                  <div class="spec-item"><span class="spec-label">CPU:</span> <span id="cal-cpu-name" class="spec-value">--</span></div>
+                  <div class="spec-item"><span class="spec-label">Threads:</span> <span id="cal-cpu-threads" class="spec-value">--</span></div>
+                  <div class="spec-item"><span class="spec-label">Memory:</span> <span id="cal-ram-size" class="spec-value">--</span></div>
+                  <div class="spec-item"><span class="spec-label">GPU:</span> <span id="cal-gpu-name" class="spec-value">--</span></div>
+                </div>
+                <p id="calibration-summary" class="calibration-summary-text">Analyzing hardware topology...</p>
+                <div class="calibration-footer">
+                  <span id="calibration-status" class="file-path-badge">Ready to apply</span>
+                  <button id="apply-calibration-btn" class="action-button secondary" type="button">✓ Apply Calibrated Settings</button>
+                </div>
+              </div>
+            </section>
+
             <section class="config-group">
               <h2>Process Optimization</h2>
               <div class="setting-row">
@@ -86,8 +275,8 @@
             </section>
             <section class="config-group">
               <h2>Launch Settings &amp; Flags</h2>
-              <label for="startup-flags">Custom Startup Flags (Steam Protocol):</label>
-              <input id="startup-flags" type="text" value="-dx12 -high -USEALLAVAILABLECORES" />
+              <label for="startup-flags">Custom Startup Flags (Direct Launch):</label>
+              <input id="startup-flags" type="text" value="-dx12" />
               <div class="preset-chips-label">Quick Performance Presets:</div>
               <div class="preset-chips">
                 <button type="button" class="preset-chip" data-flag="-USEALLAVAILABLECORES">+ -USEALLAVAILABLECORES</button>
@@ -155,7 +344,14 @@
             </div>
           </div>
         </div>
+        <!-- Bottom-Right Floating Audio Controller Dock -->
+        <div id="launcher-audio-dock" class="launcher-audio-dock" role="region" aria-label="Launcher Audio Controls">
+          <button id="dock-mute-btn" class="audio-dock-btn" type="button" onclick="window.toggleLauncherMute(event)" title="Click to mute audio">🔊</button>
+          <input id="dock-volume-slider" class="audio-dock-slider" type="range" min="0" max="100" value="100" oninput="window.updateLauncherVolume(this.value, event)" onchange="window.updateLauncherVolume(this.value, event)" title="Adjust music volume" />
+          <span id="dock-volume-text" class="audio-dock-text">100%</span>
+        </div>
       </div>
     </main>
+    <script src="./main.js"></script>
   </body>
 </html>

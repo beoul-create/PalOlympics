@@ -1,0 +1,11 @@
+{
+  "version": "0.1.4",
+  "notes": "PalOlympics Launcher v0.1.4: CPU efficiency optimizations, Steam/EOS launch authentication flags, Native In-App Updater & Relauncher, Self-Calibrating System Hardware Optimizer, Live Dedicated Server Status Board & Player Roster, Custom Soundtracks & Themes, and PalOlympicsFPSBooster Modpack Suite.",
+  "pub_date": "2026-08-20T00:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.4/PalOlympics.Launcher_0.1.4_x64_en-US.msi"
+    }
+  }
+}
