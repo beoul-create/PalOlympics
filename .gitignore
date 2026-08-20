@@ -25,3 +25,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Tauri Private Keys
+.tauri/
+*.key
+*.key.pub
