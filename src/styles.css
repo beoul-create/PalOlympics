@@ -161,6 +161,7 @@ body.no-animations * {
   animation: fadeIn .2s ease;
   pointer-events: auto !important;
   -webkit-app-region: no-drag !important;
+  content-visibility: auto;
 }
 .tab-panel.active {
   display: block;
@@ -1209,5 +1210,43 @@ body.theme-crimson .tab-panel { scrollbar-color: rgba(220, 38, 38, 0.4) rgba(7, 
   align-items: center;
 }
 
+.preset-chips-label {
+  font: 700 11px "Trebuchet MS", sans-serif;
+  color: #0369a1;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
 
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
 
+.preset-chip {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(14, 116, 144, 0.25);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font: 600 10.5px "Trebuchet MS", sans-serif;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.preset-chip:hover {
+  background: rgba(14, 116, 144, 0.12);
+  border-color: #0284c7;
+  color: #0369a1;
+  transform: translateY(-1px);
+}
+
+.preset-chip.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-color: #0369a1;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(2, 132, 199, 0.35);
+  font-weight: 700;
+}

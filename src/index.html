@@ -278,17 +278,22 @@
               </div>
             </section>
             <section class="config-group">
-              <h2>Launch Settings &amp; Flags</h2>
+              <div class="setting-header-row" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Launch Settings &amp; Flags</h2>
+                <button id="quick-auto-calibrate-btn" class="action-button secondary" style="font-size:10.5px; padding:3px 8px; margin:0;" type="button" title="Detect hardware and apply optimal flags immediately">⚡ Auto-Detect Preset</button>
+              </div>
               <label for="startup-flags">Custom Startup Flags (Direct Launch):</label>
-              <input id="startup-flags" type="text" value="-dx12" />
-              <div class="preset-chips-label">Quick Performance Presets:</div>
+              <input id="startup-flags" type="text" value="-dx12 -USEALLAVAILABLECORES -useperfthreads -NoVerifyGC -NOSPLASH" />
+              <div class="preset-chips-label">Quick Toggle Performance Flags:</div>
               <div class="preset-chips">
                 <button type="button" class="preset-chip" data-flag="-USEALLAVAILABLECORES">+ -USEALLAVAILABLECORES</button>
-                <button type="button" class="preset-chip" data-flag="-dx12">+ -dx12</button>
                 <button type="button" class="preset-chip" data-flag="-useperfthreads">+ -useperfthreads</button>
+                <button type="button" class="preset-chip" data-flag="-dx12">+ -dx12</button>
+                <button type="button" class="preset-chip" data-flag="-dx11">+ -dx11</button>
                 <button type="button" class="preset-chip" data-flag="-NoVerifyGC">+ -NoVerifyGC</button>
-                <button type="button" class="preset-chip" data-flag="-high">+ -high</button>
+                <button type="button" class="preset-chip" data-flag="-NOSPLASH">+ -NOSPLASH</button>
                 <button type="button" class="preset-chip" data-flag="-nomansky">+ -nomansky</button>
+                <button type="button" class="preset-chip" data-flag="-lowmemory">+ -lowmemory</button>
               </div>
             </section>
           </div>

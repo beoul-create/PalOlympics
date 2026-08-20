@@ -269,6 +269,32 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   animationsDisabled = animationsToggle ? animationsToggle.checked : false;
 
+  let wasAudioMutedBeforeTray = false;
+  let isHiddenInTray = false;
+
+  window.handleTrayHide = () => {
+    isHiddenInTray = true;
+    const audio = document.getElementById("launcher-music") || document.querySelector("audio");
+    if (audio) {
+      wasAudioMutedBeforeTray = audio.muted || Number(audio.volume) === 0 || audio.paused;
+      audio.muted = true;
+      audio.pause();
+    }
+  };
+
+  window.handleTrayRestore = () => {
+    isHiddenInTray = false;
+    const audio = document.getElementById("launcher-music") || document.querySelector("audio");
+    if (audio) {
+      if (!wasAudioMutedBeforeTray) {
+        const targetVol = (window._lastVolume !== undefined && window._lastVolume > 0) ? window._lastVolume : 100;
+        audio.volume = targetVol / 100;
+        audio.muted = false;
+        audio.play().catch(() => {});
+      }
+    }
+  };
+
   const dragWindow = async (event) => {
     event.preventDefault();
     await appWindow.startDragging();
@@ -293,6 +319,9 @@ window.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       event.stopPropagation();
       try {
+        if (trayToggle && trayToggle.checked) {
+          window.handleTrayHide();
+        }
         const win = getTauriWindow();
         if (win) await win.close();
       } catch (error) {
@@ -356,40 +385,61 @@ window.addEventListener("DOMContentLoaded", () => {
   let interpolatedFrames = [];
   let totalGifDuration = 0;
   let canvasAnimationId = null;
+  let canvasTimerId = null;
   let precalcTileWidth = 0;
   let precalcTileHeight = 768;
   let precalcDoublePeriod = 0;
   let isWindowFocused = true;
 
+  const cancelCanvasLoop = () => {
+    if (canvasAnimationId) {
+      cancelAnimationFrame(canvasAnimationId);
+      canvasAnimationId = null;
+    }
+    if (canvasTimerId) {
+      clearTimeout(canvasTimerId);
+      canvasTimerId = null;
+    }
+  };
+
   window.addEventListener("focus", () => {
     isWindowFocused = true;
-    if (interpolatedFrames.length > 0 && !canvasAnimationId && !animationsDisabled && !document.hidden) {
+    if (interpolatedFrames.length > 0 && !canvasAnimationId && !canvasTimerId && !animationsDisabled && !document.hidden) {
       startCanvasRenderLoop();
     }
   });
 
   window.addEventListener("blur", () => {
     isWindowFocused = false;
+    cancelCanvasLoop();
+    if (fpsDisplay) {
+      fpsDisplay.textContent = "0 FPS (Unfocused)";
+      fpsDisplay.style.color = "#94a3b8";
+    }
   });
 
-  let frameTimestamps = [];
+  let fpsFrameCount = 0;
+  let fpsWindowStart = performance.now();
   let lastFpsBadgeUpdate = 0;
 
   const trackFps = (now) => {
-    frameTimestamps.push(now);
-    while (frameTimestamps.length > 0 && frameTimestamps[0] <= now - 1000) {
-      frameTimestamps.shift();
-    }
-    if (now - lastFpsBadgeUpdate >= 250 && fpsDisplay) {
+    fpsFrameCount++;
+    if (now - lastFpsBadgeUpdate >= 500) {
+      const elapsed = (now - fpsWindowStart) / 1000;
+      const currentFps = elapsed > 0 ? Math.round(fpsFrameCount / elapsed) : 0;
+      fpsFrameCount = 0;
+      fpsWindowStart = now;
       lastFpsBadgeUpdate = now;
-      const currentFps = frameTimestamps.length;
-      fpsDisplay.textContent = `${currentFps} FPS`;
-      if (currentFps >= 100) {
-        fpsDisplay.style.color = "#4ade80"; // Bright Green for 100+ FPS
-      } else if (currentFps >= 60) {
-        fpsDisplay.style.color = "#38bdf8"; // Sky Blue for 60-99 FPS
-      } else {
-        fpsDisplay.style.color = "#f59e0b"; // Amber
+
+      if (fpsDisplay) {
+        fpsDisplay.textContent = `${currentFps} FPS`;
+        if (currentFps >= 60) {
+          fpsDisplay.style.color = "#4ade80"; // Bright Green
+        } else if (currentFps >= 25) {
+          fpsDisplay.style.color = "#38bdf8"; // Sky Blue
+        } else {
+          fpsDisplay.style.color = "#f59e0b"; // Amber
+        }
       }
     }
   };
@@ -400,8 +450,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let lastRenderTime = 0;
 
   const startCanvasRenderLoop = () => {
-    if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
-    if (!interpolatedFrames.length || !bgCanvas || animationsDisabled || document.hidden) return;
+    cancelCanvasLoop();
+    if (!interpolatedFrames.length || !bgCanvas || animationsDisabled || document.hidden || !isWindowFocused) return;
 
     bgCanvas.width = 1440;
     bgCanvas.height = 768;
@@ -416,27 +466,31 @@ window.addEventListener("DOMContentLoaded", () => {
     lastRenderTime = 0;
 
     const renderLoop = (now) => {
+      canvasAnimationId = null;
       const isGameRunning = gameStatus && gameStatus.dataset.running === "true";
       if (document.hidden || animationsDisabled || isGameRunning || !isWindowFocused) {
         if (fpsDisplay) {
           fpsDisplay.textContent = isGameRunning ? "0 FPS (Game Running)" : (!isWindowFocused ? "0 FPS (Unfocused)" : (animationsDisabled ? "0 FPS (Off)" : "0 FPS (Idle)"));
           fpsDisplay.style.color = "#94a3b8";
         }
-        canvasAnimationId = null;
+        cancelCanvasLoop();
         return;
       }
 
       const useHwAccel = hwAccelToggle ? hwAccelToggle.checked : true;
-      const targetFps = useHwAccel ? 45 : 30;
+      const targetFps = useHwAccel ? 30 : 24;
       const targetInterval = 1000 / targetFps;
 
-      if (targetInterval > 0) {
-        const timeSinceLastRender = now - lastRenderTime;
-        if (timeSinceLastRender < targetInterval - 2.0) {
+      const timeSinceLastRender = now - lastRenderTime;
+      if (timeSinceLastRender < targetInterval - 1.0) {
+        // Sleep until next frame rather than spinning
+        const delay = Math.max(1, Math.floor(targetInterval - timeSinceLastRender));
+        canvasTimerId = setTimeout(() => {
           canvasAnimationId = requestAnimationFrame(renderLoop);
-          return;
-        }
+        }, delay);
+        return;
       }
+
       lastRenderTime = now;
       trackFps(now);
 
@@ -485,7 +539,10 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      canvasAnimationId = requestAnimationFrame(renderLoop);
+      // Schedule next frame with a gentle timeout throttle to prevent busy loops
+      canvasTimerId = setTimeout(() => {
+        canvasAnimationId = requestAnimationFrame(renderLoop);
+      }, Math.max(1, Math.floor(targetInterval - 4)));
     };
 
     canvasAnimationId = requestAnimationFrame(renderLoop);
@@ -568,10 +625,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const applyBackgroundMode = () => {
     stopCloudAnimations();
-    if (canvasAnimationId) {
-      cancelAnimationFrame(canvasAnimationId);
-      canvasAnimationId = null;
-    }
+    cancelCanvasLoop();
 
     const useHwAccel = hwAccelToggle ? hwAccelToggle.checked : true;
     document.documentElement.classList.toggle("no-hw-accel", !useHwAccel);
@@ -1180,13 +1234,76 @@ window.addEventListener("DOMContentLoaded", () => {
         if (customBgDimmer) customBgDimmer.style.backdropFilter = `blur(${config.bg_blur_radius}px)`;
       }
 
+      // Update Preset Chips
       updatePresetChipStates();
+
+      // Silent Auto-Calibration on Initial Run if generic/empty flags
+      if (!config.startup_flags || config.startup_flags === "-dx12" || config.startup_flags.trim() === "") {
+        try {
+          const profile = await invoke("calibrate_hardware_profile");
+          if (profile && profile.recommended_flags) {
+            activeCalibratedProfile = profile;
+            if (startupFlagsInput) startupFlagsInput.value = profile.recommended_flags;
+            updatePresetChipStates();
+            await invoke("apply_calibrated_profile", { profile });
+            populateCalibrationCard(profile);
+            saveLauncherConfig();
+          }
+        } catch (_) {}
+      }
+
       await initGamePathAndModpack(config);
     } catch (err) {
       console.warn("Failed to load launcher config:", err);
       await initGamePathAndModpack(null);
     }
   };
+
+  function updatePresetChipStates() {
+    if (!startupFlagsInput) return;
+    const currentFlags = (startupFlagsInput.value || "").split(/\s+/).filter(Boolean);
+    const chips = document.querySelectorAll(".preset-chip");
+    chips.forEach((chip) => {
+      const flag = chip.dataset.flag;
+      if (!flag) return;
+      const isActive = currentFlags.includes(flag);
+      chip.classList.toggle("active", isActive);
+      chip.textContent = isActive ? `✓ ${flag}` : `+ ${flag}`;
+    });
+  }
+
+  // Preset Chips Click Handler
+  document.querySelectorAll(".preset-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      if (!startupFlagsInput) return;
+      const targetFlag = chip.dataset.flag;
+      if (!targetFlag) return;
+
+      let currentFlags = (startupFlagsInput.value || "").split(/\s+/).filter(Boolean);
+      if (currentFlags.includes(targetFlag)) {
+        currentFlags = currentFlags.filter((f) => f !== targetFlag);
+      } else {
+        // Prevent DX11 and DX12 renderer conflicts
+        if (targetFlag === "-dx11") {
+          currentFlags = currentFlags.filter((f) => f !== "-dx12");
+        } else if (targetFlag === "-dx12") {
+          currentFlags = currentFlags.filter((f) => f !== "-dx11");
+        }
+        currentFlags.push(targetFlag);
+      }
+
+      startupFlagsInput.value = currentFlags.join(" ");
+      updatePresetChipStates();
+      saveLauncherConfig();
+    });
+  });
+
+  if (startupFlagsInput) {
+    startupFlagsInput.addEventListener("input", () => {
+      updatePresetChipStates();
+      saveLauncherConfig();
+    });
+  }
 
   if (autoPriorityToggle) {
     autoPriorityToggle.addEventListener("change", () => {
@@ -1195,8 +1312,22 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function populateCalibrationCard(profile) {
+    if (!profile) return;
+    if (calibrationCard) calibrationCard.style.display = "block";
+    if (calibrationTierBadge) calibrationTierBadge.textContent = profile.tier_badge || "OPTIMIZED";
+    if (calibrationTierTitle) calibrationTierTitle.textContent = profile.tier || "System Profile";
+    if (calCpuName) calCpuName.textContent = profile.cpu_name || "--";
+    if (calCpuThreads) calCpuThreads.textContent = `${profile.cpu_threads || "--"} Logical Cores`;
+    if (calRamSize) calRamSize.textContent = `${profile.ram_gb || "--"} GB RAM`;
+    if (calGpuName) calGpuName.textContent = profile.gpu_name || "--";
+    if (calibrationSummary) calibrationSummary.textContent = `${profile.summary} (Streaming Pool: ${profile.recommended_pool_mb}MB | Startup Flags: ${profile.recommended_flags})`;
+    if (calibrationStatus) calibrationStatus.textContent = "✓ Optimized Engine.ini & startup flags calibrated for your system.";
+  }
+
   // Self-Calibrating System Optimizer
   const autoCalibrateBtn = document.querySelector("#auto-calibrate-btn");
+  const quickAutoCalibrateBtn = document.querySelector("#quick-auto-calibrate-btn");
   const calibrationCard = document.querySelector("#calibration-card");
   const calibrationTierBadge = document.querySelector("#calibration-tier-badge");
   const calibrationTierTitle = document.querySelector("#calibration-tier-title");
@@ -1210,34 +1341,45 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let activeCalibratedProfile = null;
 
-  if (autoCalibrateBtn) {
-    autoCalibrateBtn.addEventListener("click", async () => {
-      autoCalibrateBtn.disabled = true;
-      autoCalibrateBtn.textContent = "⏳ Scanning Hardware...";
-      if (calibrationCard) calibrationCard.style.display = "block";
-      if (calibrationTierBadge) calibrationTierBadge.textContent = "ANALYZING...";
-      if (calibrationTierTitle) calibrationTierTitle.textContent = "Scanning System Architecture...";
-      if (calibrationStatus) calibrationStatus.textContent = "Probing CPU cores, RAM, and GPU capabilities...";
+  const performAutoCalibration = async (btn) => {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "⏳ Scanning Hardware...";
+    }
+    if (calibrationCard) calibrationCard.style.display = "block";
+    if (calibrationTierBadge) calibrationTierBadge.textContent = "ANALYZING...";
+    if (calibrationTierTitle) calibrationTierTitle.textContent = "Scanning System Architecture...";
+    if (calibrationStatus) calibrationStatus.textContent = "Probing CPU cores, RAM, and GPU capabilities...";
 
-      try {
-        const profile = await invoke("calibrate_hardware_profile");
-        activeCalibratedProfile = profile;
+    try {
+      const profile = await invoke("calibrate_hardware_profile");
+      activeCalibratedProfile = profile;
+      populateCalibrationCard(profile);
 
-        if (calibrationTierBadge) calibrationTierBadge.textContent = profile.tier_badge || "OPTIMIZED";
-        if (calibrationTierTitle) calibrationTierTitle.textContent = profile.tier || "System Profile";
-        if (calCpuName) calCpuName.textContent = profile.cpu_name;
-        if (calCpuThreads) calCpuThreads.textContent = `${profile.cpu_threads} Logical Cores`;
-        if (calRamSize) calRamSize.textContent = `${profile.ram_gb} GB RAM`;
-        if (calGpuName) calGpuName.textContent = profile.gpu_name;
-        if (calibrationSummary) calibrationSummary.textContent = `${profile.summary} (Streaming Pool: ${profile.recommended_pool_mb}MB | Recommended Flags: ${profile.recommended_flags})`;
-        if (calibrationStatus) calibrationStatus.textContent = "Profile computed! Click apply to calibrate Engine.ini and startup flags.";
-      } catch (err) {
-        if (calibrationStatus) calibrationStatus.textContent = `Calibration error: ${err}`;
-      } finally {
-        autoCalibrateBtn.disabled = false;
-        autoCalibrateBtn.textContent = "⚡ Auto-Calibrate for My Hardware";
+      // Auto-apply recommended startup flags and Engine.ini optimizations
+      if (profile.recommended_flags && startupFlagsInput) {
+        startupFlagsInput.value = profile.recommended_flags;
+        updatePresetChipStates();
       }
-    });
+      const msg = await invoke("apply_calibrated_profile", { profile });
+      if (calibrationStatus) calibrationStatus.textContent = `✓ ${msg}`;
+      saveLauncherConfig();
+    } catch (err) {
+      if (calibrationStatus) calibrationStatus.textContent = `Calibration error: ${err}`;
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = btn === quickAutoCalibrateBtn ? "⚡ Auto-Detect Preset" : "⚡ Auto-Calibrate for My Hardware";
+      }
+    }
+  };
+
+  if (autoCalibrateBtn) {
+    autoCalibrateBtn.addEventListener("click", () => performAutoCalibration(autoCalibrateBtn));
+  }
+
+  if (quickAutoCalibrateBtn) {
+    quickAutoCalibrateBtn.addEventListener("click", () => performAutoCalibration(quickAutoCalibrateBtn));
   }
 
   if (applyCalibrationBtn) {
@@ -1538,14 +1680,28 @@ window.addEventListener("DOMContentLoaded", () => {
     refreshGameStatus();
   });
 
+  listenEvent("launcher-hidden-to-tray", () => {
+    window.handleTrayHide();
+  });
+
+  listenEvent("launcher-restored-from-tray", () => {
+    window.handleTrayRestore();
+  });
+
   let statusInterval = window.setInterval(refreshGameStatus, 10000);
   document.addEventListener("visibilitychange", () => {
     applyBackgroundMode();
     if (document.hidden) {
       window.clearInterval(statusInterval);
+      if (trayToggle && trayToggle.checked) {
+        window.handleTrayHide();
+      }
       return;
     }
 
+    if (isHiddenInTray) {
+      window.handleTrayRestore();
+    }
     refreshGameStatus();
     statusInterval = window.setInterval(refreshGameStatus, 10000);
   });

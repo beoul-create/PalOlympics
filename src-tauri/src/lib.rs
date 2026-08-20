@@ -9,7 +9,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 use tauri::menu::{Menu, MenuItem};
-use tauri::tray::TrayIconBuilder;
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Emitter, Manager, State, WindowEvent};
 use tauri_plugin_updater::UpdaterExt;
 
@@ -712,7 +712,7 @@ fn build_engine_ini_optimization_string(
     };
 
     format!(
-        "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\n{d3d12_section}r.Streaming.PoolSize={pool_size_mb}\nr.Streaming.LimitPoolSizeToVRAM=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.Streaming.AmortizeCPUToGPUCopy=1\nr.Streaming.DefragDynamicBounds=1\nr.Streaming.CheckResourcesWithMissingMesh=0\nr.Streaming.MaxEffectiveScreenSize=0\nr.Streaming.MaxNumTexturesToStreamPerCycle=3\nr.TextureStreaming=1\nr.bForceCPUAccessToGPUBuffer=0\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\nr.ShaderPipelineCache.SaveAfterInitialLoad=1\nr.ShaderPipelineCache.PreCompile=1\nr.VolumetricFog=1\nr.VolumetricFog.GridPixelSize=16\nr.VolumetricFog.GridSizeZ=64\nr.VolumetricCloud=1\nr.VolumetricCloud.ViewRaySampleCountScale=0.5\nr.VolumetricCloud.Shadow.ViewRaySampleCountScale=0.5\nr.Shadow.Virtual.Enable=0\nr.Shadow.CSM.MaxCascades=3\nr.Shadow.MaxResolution=2048\nr.MotionBlurQuality=0\nr.DepthOfFieldQuality=0\nr.SceneColorFmt=6\nr.Tonemapper.GrainQuantization=0\nr.OneFrameThreadLag=1\nfx.Niagara.AllowAsyncTick=1\nau.DisableSeamlessLooping=0\ngc.IncrementalBeginDestroyEnabled=True\ngc.CreateGCClusters=True\ngc.NumRetriesBeforeForcingGC=10\ngc.MinDesiredObjectsPerSubTask=20\ngc.TimeBetweenPurgingPendingKillObjects={gc_time_secs}\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime={async_time_ms}\ns.AsyncLoadingUseFullTimeLimit=0\ns.PriorityAsyncLoadingExtraTime=15.0\ns.LevelStreamingActorsUpdateTimeLimit=5.0\ns.PriorityLevelStreamingActorsUpdateExtraTime=5.0\ns.UnregisterComponentsTimeLimit=1.0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n"
+        "\n[/Script/Engine.Engine]\nbSmoothFrameRate=False\n\n[SystemSettings]\n{d3d12_section}r.Streaming.PoolSize={pool_size_mb}\nr.Streaming.LimitPoolSizeToVRAM=1\nr.Streaming.HLODStrategy=2\nr.Streaming.Boost=1\nr.Streaming.FramesForFullUpdate=1\nr.Streaming.AmortizeCPUToGPUCopy=1\nr.Streaming.DefragDynamicBounds=1\nr.Streaming.CheckResourcesWithMissingMesh=0\nr.Streaming.MaxEffectiveScreenSize=0\nr.Streaming.MaxNumTexturesToStreamPerCycle=6\nr.Streaming.MipBias=0\nr.MaxAnisotropy=16\nr.TextureStreaming=1\nr.bForceCPUAccessToGPUBuffer=0\nr.CreateShadersOnLoad=0\nr.Shaders.Optimize=1\nr.ShaderPipelineCache.BatchTime=1.0\nr.ShaderPipelineCache.BackgroundBatchTime=0.5\nr.ShaderPipelineCache.SaveAfterInitialLoad=1\nr.ShaderPipelineCache.PreCompile=1\nr.VolumetricFog=1\nr.VolumetricFog.GridPixelSize=16\nr.VolumetricFog.GridSizeZ=64\nr.VolumetricCloud=1\nr.VolumetricCloud.ViewRaySampleCountScale=0.5\nr.VolumetricCloud.Shadow.ViewRaySampleCountScale=0.5\nr.Shadow.Virtual.Enable=0\nr.Shadow.CSM.MaxCascades=3\nr.Shadow.MaxResolution=2048\nr.MotionBlurQuality=0\nr.DepthOfFieldQuality=0\nr.SceneColorFmt=6\nr.Tonemapper.GrainQuantization=0\nr.Tonemapper.Sharpen=0.8\nr.OneFrameThreadLag=1\nr.ParallelMeshDispatch=1\na.URO.ForceAnimRate=1\nfx.Niagara.AllowAsyncTick=1\nau.DisableSeamlessLooping=0\ngc.IncrementalBeginDestroyEnabled=True\ngc.CreateGCClusters=True\ngc.NumRetriesBeforeForcingGC=10\ngc.MinDesiredObjectsPerSubTask=20\ngc.TimeBetweenPurgingPendingKillObjects={gc_time_secs}\ns.AsyncLoadingThreadEnabled=True\ns.AsyncLoadingTime={async_time_ms}\ns.AsyncLoadingUseFullTimeLimit=0\ns.PriorityAsyncLoadingExtraTime=25.0\ns.LevelStreamingActorsUpdateTimeLimit=10.0\ns.PriorityLevelStreamingActorsUpdateExtraTime=10.0\ns.UnregisterComponentsTimeLimit=1.0\nSlate.bAllowThrottling=0\nSlate.SleepBufferTarget=0\nSlate.EnableSlatePostBuffers=0\nr.FastBlurThreshold=0\n"
     )
 }
 
@@ -822,18 +822,27 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
             }
         }
 
-        // Query GPU Name from Registry
-        if let Ok(output) = std::process::Command::new("reg")
-            .args(&["query", "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e968-e325-11ce-bfc1-08002be10318}\\0000", "/v", "DriverDesc"])
-            .output()
-        {
-            let text = String::from_utf8_lossy(&output.stdout);
-            for line in text.lines() {
-                if line.contains("DriverDesc") {
-                    if let Some(pos) = line.find("REG_SZ") {
-                        let name = line[pos + 6..].trim();
-                        if !name.is_empty() {
-                            gpu_name = name.to_string();
+        // Query GPU Name from Registry across subkeys 0000 through 0003, prioritizing dedicated GPUs
+        for subkey in &["0000", "0001", "0002", "0003"] {
+            let reg_path = format!(r"HKLM\SYSTEM\CurrentControlSet\Control\Class\{{4d36e968-e325-11ce-bfc1-08002be10318}}\{}", subkey);
+            if let Ok(output) = std::process::Command::new("reg")
+                .args(&["query", &reg_path, "/v", "DriverDesc"])
+                .output()
+            {
+                let text = String::from_utf8_lossy(&output.stdout);
+                for line in text.lines() {
+                    if line.contains("DriverDesc") {
+                        if let Some(pos) = line.find("REG_SZ") {
+                            let name = line[pos + 6..].trim();
+                            if !name.is_empty() {
+                                let lower = name.to_lowercase();
+                                if lower.contains("nvidia") || lower.contains("geforce") || lower.contains("rtx") || lower.contains("radeon rx") || lower.contains("arc") {
+                                    gpu_name = name.to_string();
+                                    break;
+                                } else if gpu_name == "DirectX 12 Compatible GPU" {
+                                    gpu_name = name.to_string();
+                                }
+                            }
                         }
                     }
                 }
@@ -882,7 +891,7 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
         (
             "Ultra Enthusiast Profile".to_string(),
             "ULTRA TIER".to_string(),
-            "-dx12 -USEALLAVAILABLECORES -useperfthreads -NoVerifyGC".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -useperfthreads -NoVerifyGC -NOSPLASH".to_string(),
             4096,
             "Calibrated for high-end multi-threaded hardware. Unlocks a 4GB texture streaming budget, DirectX 12 Async Compute, P-Core thread allocation, and non-blocking incremental GC.".to_string(),
         )
@@ -890,15 +899,15 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
         (
             "High Performance Gaming Profile".to_string(),
             "HIGH TIER".to_string(),
-            "-dx12 -USEALLAVAILABLECORES -useperfthreads".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -useperfthreads -NoVerifyGC -NOSPLASH".to_string(),
             3072,
-            "Balanced for modern gaming PCs. 3GB texture streaming pool with D3D12 Async Compute, optimized volumetric fog, and 8+ thread distribution.".to_string(),
+            "Balanced for modern gaming PCs. 3GB texture streaming pool with D3D12 Async Compute, GC verification bypass, and 8+ thread distribution.".to_string(),
         )
     } else if ram_gb >= 8.0 && cpu_threads >= 4 {
         (
             "Balanced Mainstream Profile".to_string(),
             "MAINSTREAM TIER".to_string(),
-            "-dx12 -USEALLAVAILABLECORES -nomansky".to_string(),
+            "-dx12 -USEALLAVAILABLECORES -nomansky -NoVerifyGC -NOSPLASH".to_string(),
             2048,
             "Optimized for smooth framerates on mainstream systems. Disables background sky overhead, allocates 2GB streaming cache, and scales volumetric raymarching.".to_string(),
         )
@@ -906,7 +915,7 @@ fn calibrate_hardware_profile() -> Result<CalibrationResult, String> {
         (
             "Maximum Efficiency & Low-Memory Profile".to_string(),
             "EFFICIENCY TIER".to_string(),
-            "-dx11 -USEALLAVAILABLECORES -nomansky -lowmemory".to_string(),
+            "-dx11 -USEALLAVAILABLECORES -nomansky -lowmemory -NOSPLASH".to_string(),
             1024,
             "Lightweight low-footprint mode. Forces DirectX 11, aggressive 45s RAM cleanups, and 1GB texture pool to eliminate micro-stutters.".to_string(),
         )
@@ -1039,7 +1048,7 @@ async fn query_server_status(server_address: String, password: Option<String>) -
     let is_local_server_running = !win_process::find_server_pids().is_empty();
 
     let client = reqwest::Client::builder()
-        .timeout(Duration::from_millis(2000))
+        .timeout(Duration::from_millis(1200))
         .build()
         .map_err(|e| e.to_string())?;
 
@@ -1078,7 +1087,8 @@ async fn query_server_status(server_address: String, password: Option<String>) -
                 }
 
                 if let Ok(res) = req.send().await {
-                    if res.status().is_success() {
+                    let status_code = res.status();
+                    if status_code.is_success() {
                         let elapsed = start_instant.elapsed().as_millis() as u32;
                         ping_ms = if t_host == "127.0.0.1" || t_host == "localhost" { 5 } else { elapsed.max(12) };
                         if let Ok(json) = res.json::<serde_json::Value>().await {
@@ -1160,7 +1170,13 @@ async fn query_server_status(server_address: String, password: Option<String>) -
                         }
 
                         break 'host_loop;
+                    } else if status_code != reqwest::StatusCode::UNAUTHORIZED {
+                        // Port replied with non-401 (e.g. 404, 500, etc.), do not retry passwords on this port
+                        break;
                     }
+                } else {
+                    // Connection failed or timed out on this host:port, skip remaining passwords for this port
+                    break;
                 }
             }
         }
@@ -1972,6 +1988,7 @@ pub fn start_game_lifecycle_and_priority_watcher(
                         was_game_running = true;
                         if close_on_launch.load(Ordering::Relaxed) {
                             if let Some(window) = app_handle.get_webview_window("main") {
+                                let _ = window.emit("launcher-hidden-to-tray", ());
                                 let _ = window.hide();
                             }
                         }
@@ -1998,6 +2015,7 @@ pub fn start_game_lifecycle_and_priority_watcher(
                                 let _ = window.unminimize();
                                 let _ = window.set_focus();
                                 let _ = window.emit("game-exited", ());
+                                let _ = window.emit("launcher-restored-from-tray", ());
                             }
                         }
                     }
@@ -2008,10 +2026,10 @@ pub fn start_game_lifecycle_and_priority_watcher(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Uncap WebView2 frame rate and force high-performance GPU rasterization for >60 FPS displays (120Hz/144Hz/240Hz)
+    // Enable high-performance GPU rasterization for smooth hardware-accelerated UI rendering
     std::env::set_var(
         "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-        "--disable-frame-rate-limit --enable-gpu-rasterization --ignore-gpu-blocklist --enable-zero-copy --enable-features=CanvasOopRasterization",
+        "--enable-gpu-rasterization --ignore-gpu-blocklist --enable-zero-copy --enable-features=CanvasOopRasterization",
     );
 
     let (tx, rx) = mpsc::channel::<IpcCommand>();
@@ -2079,11 +2097,29 @@ pub fn run() {
                 .icon(icon)
                 .menu(&menu)
                 .tooltip("PalOlympics Launcher")
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.unminimize();
+                            let _ = window.set_focus();
+                            let _ = window.emit("launcher-restored-from-tray", ());
+                        }
+                    }
+                })
                 .on_menu_event(|app, event| match event.id().as_ref() {
                     "show" => {
                         if let Some(window) = app.get_webview_window("main") {
                             let _ = window.show();
+                            let _ = window.unminimize();
                             let _ = window.set_focus();
+                            let _ = window.emit("launcher-restored-from-tray", ());
                         }
                     }
                     "quit" => app.exit(0),
@@ -2097,6 +2133,7 @@ pub fn run() {
                 let state = window.state::<LauncherState>();
                 if state.minimize_to_tray.load(Ordering::Relaxed) {
                     api.prevent_close();
+                    let _ = window.emit("launcher-hidden-to-tray", ());
                     let _ = window.hide();
                 }
             }

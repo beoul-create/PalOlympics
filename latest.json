@@ -1,11 +1,19 @@
 {
-  "version": "0.1.4",
-  "notes": "PalOlympics Launcher v0.1.4: CPU efficiency optimizations, Steam/EOS launch authentication flags, Native In-App Updater & Relauncher, Self-Calibrating System Hardware Optimizer, Live Dedicated Server Status Board & Player Roster, Custom Soundtracks & Themes, and PalOlympicsFPSBooster Modpack Suite.",
-  "pub_date": "2026-08-20T00:00:00Z",
+  "version": "0.1.6",
+  "notes": "Auto-calibrated startup flags & streaming pools, background 30 FPS mode, base camp CPU reduction, fast travel blackout reducer, storage caching, tray auto-mute, and 25% CPU idle fix.",
+  "pub_date": "2026-08-20T14:55:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.4/PalOlympics.Launcher_0.1.4_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFp0ZUsrdVRzaCt2a1BEdnJrTXFtNmVRN0xNTmJJSE5IMXloUTF6bTU0WTZ4WFRRNG1qK3VpWDd0OEVRL1dLK0J5N1BNVk5rZG9BL2pZMFpYTlFFWHc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTczCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0X2VuLVVTLm1zaQo4TzRTOUtob2VENW13cDZYRGp6aUhPRndsWkNsZmRjM0Z0Uzc4MGxGSVJZbllhanl0d1Qzb3pwYWx4NnJiUnBta1dpeWdVcUNxVlBsSE9scTV3MmZEUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64_en-US.msi"
+    },
+    "windows-x86_64-msi": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFp0ZUsrdVRzaCt2a1BEdnJrTXFtNmVRN0xNTmJJSE5IMXloUTF6bTU0WTZ4WFRRNG1qK3VpWDd0OEVRL1dLK0J5N1BNVk5rZG9BL2pZMFpYTlFFWHc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTczCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0X2VuLVVTLm1zaQo4TzRTOUtob2VENW13cDZYRGp6aUhPRndsWkNsZmRjM0Z0Uzc4MGxGSVJZbllhanl0d1Qzb3pwYWx4NnJiUnBta1dpeWdVcUNxVlBsSE9scTV3MmZEUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64_en-US.msi"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGZnNnhINTBHRFFCL3hLbDV1RGVDQzBuYmljSUJEbE54NHdWZGFrMnJiaGNEMENsenhtMW5XQXdUU253NUJlT3U0TUhzSEM5c1E2SW1qaVlIS3FHOEFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjMyOTc2CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjVfeDY0LXNldHVwLmV4ZQo1RjdPbGVnVWVpalQ2U0FPY3RhZ2prL0ttbHk1Nmk3bENtd2xMYWtJSEswcDVSLzBpajVBbFBBUVZJS3BmNWZ6Z3BVT2dlN1ZxQ2pWODlrSEw1UEVEUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.5/PalOlympics.Launcher_0.1.5_x64-setup.exe"
     }
   }
 }
