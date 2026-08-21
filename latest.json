@@ -1,19 +1,19 @@
 {
-  "version": "0.1.8",
-  "notes": "v0.1.7: Minimal in-game & window branding, dynamic UMG fast travel & loading hooks, base camp multi-Pal worker optimization, Niagara combat FX async culling, contact shadow bypass, audio concurrency limit, and UE4SS level streaming stability.",
-  "pub_date": "2026-08-20T19:01:31.185Z",
+  "version": "0.1.9",
+  "notes": "v0.1.9: Comprehensive performance, server & networking overhaul. 10x Fast Travel acceleration, zero-lag chest/inventory/map opening, 100MB/s unthrottled networking, packet aggregation, persistent launcher audio volume/mute controls, and clean HUD watermark branding.",
+  "pub_date": "2026-08-21T02:08:01.062Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGFaZUc2dW5ISDF2d1YvQTArdUdNQ3BYRnUzdklZbzlXd3dyQWpPZVo0YW5VbzBZdEY1L0RxRFl5KzdkczdmYXNSRGdiUzA0a3ZZWTZreVIyd21KRFE4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDkxCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0X2VuLVVTLm1zaQpmVk50a0x4VU9GS1hSWjh2bXR3dXlaK2ZLWTltNjJ4Ym1RYzYrL1BUU0JzQ2NUYmF2TXZrUWw2aEZlaEpDWVBoM1dxS3YrKzJhZGZwdEs0K3RpRm1DQT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFVFU1o0MzZWOE1DZjBDaGdJMDNCdDd6OWwrbVo2cUpCemNnVitaajk3WU1qUkZoVDUvODFVcjJaVEZBbFJzQlY1R1N5L09qTmdhNTRicklBYVZpc2dBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3Mjc4MDgwCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjlfeDY0X2VuLVVTLm1zaQpOa1FvV3NOR1BXeEFqc25iMTBQb2hTbEJ6MVM0OGFIY3BZTi9OQ2U4NXZuWFBDTHpDOWM1ODluaFJIVFRiMjhRSEVoTFFOcnlJOFhGUjlRaFVEUlZCQT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.9/PalOlympics.Launcher_0.1.9_x64_en-US.msi"
     },
     "windows-x86_64-msi": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eGFaZUc2dW5ISDF2d1YvQTArdUdNQ3BYRnUzdklZbzlXd3dyQWpPZVo0YW5VbzBZdEY1L0RxRFl5KzdkczdmYXNSRGdiUzA0a3ZZWTZreVIyd21KRFE4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDkxCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0X2VuLVVTLm1zaQpmVk50a0x4VU9GS1hSWjh2bXR3dXlaK2ZLWTltNjJ4Ym1RYzYrL1BUU0JzQ2NUYmF2TXZrUWw2aEZlaEpDWVBoM1dxS3YrKzJhZGZwdEs0K3RpRm1DQT09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFVFU1o0MzZWOE1DZjBDaGdJMDNCdDd6OWwrbVo2cUpCemNnVitaajk3WU1qUkZoVDUvODFVcjJaVEZBbFJzQlY1R1N5L09qTmdhNTRicklBYVZpc2dBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3Mjc4MDgwCWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjlfeDY0X2VuLVVTLm1zaQpOa1FvV3NOR1BXeEFqc25iMTBQb2hTbEJ6MVM0OGFIY3BZTi9OQ2U4NXZuWFBDTHpDOWM1ODluaFJIVFRiMjhRSEVoTFFOcnlJOFhGUjlRaFVEUlZCQT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.9/PalOlympics.Launcher_0.1.9_x64_en-US.msi"
     },
     "windows-x86_64-nsis": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFgyTzBDVk1WQzhhWUtXc01kT2E5Q1ZlYldrNHdUUVNYVlFETlRmVDhXL1JlcElNdEQwUXNtVHhaQ29lQ3B0TGp5QXJ0UTF2SmFzMGJOZmx5cW5Za3dJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MjUyNDg5CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjhfeDY0LXNldHVwLmV4ZQpLbmVIVXpER3lxNkxJTGJtVm9vYm91SC9LakpFNzRybDU2YTgvd3pLdHdhVUNuYTA3czZ5c2YrV1BSZG9QWWkzQTNDTkpOTlBNVWVSMGE4eE5qQ1ZEdz09Cg==",
-      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.8/PalOlympics.Launcher_0.1.8_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUM0hnVENaWTV2eFR5MFpRQ0xmYnBndE9MUjFpRmNma09Yb1ZIQSt5UlE1TDMwMFh4UkpDQjNpVVNkRkxFamxhM0F3SjNYM3UyQnQ2YWpiS0tkbkVydVROTDcrUzlwdkFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3Mjc4MDc5CWZpbGU6UGFsT2x5bXBpY3MgTGF1bmNoZXJfMC4xLjlfeDY0LXNldHVwLmV4ZQpCOTBhbG4wWkhCS2s5cnQ0SDNJb3crQzduSk1Dbmt1eGhNN1gxVjZsNXNPcm15RlN2VTM1bk1ZZE14MUx1anRGS2tqSjRDYjUweUFjVHgvR3p2cWZEUT09Cg==",
+      "url": "https://github.com/beoul-create/palolympics-launcher/releases/download/v0.1.9/PalOlympics.Launcher_0.1.9_x64-setup.exe"
     }
   }
 }
